@@ -135,7 +135,7 @@ def evaluateMCTSInEscape(conditionDf):
     possibleSubtleties = [500, 11, 3.3, 1.83, 0.92, 0.31]
     resetBeliefAndAttention = ba.ResetBeliefAndAttention(sheepId, suspectorIds, possibleSubtleties, attentionLimitation, transferMultiAgentStatesToPositionDF, attention)
     
-    maxDistance = 7.5 * distanceToVisualDegreeRatio
+    maxDistance = 8.5 * distanceToVisualDegreeRatio
     numStandardErrorInDistanceRange = 2
     calDistancePriorOnAttentionSlot = Attention.CalDistancePriorOnAttentionSlot(minDistance, maxDistance, numStandardErrorInDistanceRange)
     attentionSwitch = Attention.AttentionSwitch(attentionLimitation, calDistancePriorOnAttentionSlot)    
@@ -171,7 +171,7 @@ def evaluateMCTSInEscape(conditionDf):
     rewardFunction = reward.RewardFunctionTerminalPenalty(sheepId, aliveBouns, deathPenalty, isTerminal)  
 
     cInit = 1
-    cBase = 50
+    cBase = 30
     calculateScore = CalculateScore(cInit, cBase)
     selectChild = SelectChild(calculateScore)
     
@@ -200,7 +200,7 @@ def evaluateMCTSInEscape(conditionDf):
 
     rootAction = actionSpace[np.random.choice(range(numActionSpace))]
     escape = 0
-    numTrial = 1
+    numTrial = 40
     for trailIndex in range(numTrial):
         import datetime
         print (datetime.datetime.now())
@@ -210,6 +210,7 @@ def evaluateMCTSInEscape(conditionDf):
             escape = escape + 1
     
     escapeRate = escape/numTrial
+    print(escapeRate)
     results = pd.Series({"escapeRate": escapeRate})
     return results
 
@@ -220,7 +221,7 @@ def drawPerformanceline(dataDf, axForDraw):
 def main():     
     numTotalSimulationTimes = [256]
     numTrees = [4]
-    subtleties = [1.83, 0.92]
+    subtleties = [3.3]
     precisionToSubtletyDict={500:0,50:5,11:30,3.3:60,1.83:90,0.92:120,0.31:150,0.001: 180}
     
     levelValues = [numTotalSimulationTimes, numTrees, subtleties]
@@ -243,7 +244,7 @@ def main():
         plotCounter+=1
 
     plt.show()
-    plt.savefig('escapeRate.png')
+    fig.savefig('escapeRate.png')
     print("Finished evaluating")
 
 if __name__ == "__main__":

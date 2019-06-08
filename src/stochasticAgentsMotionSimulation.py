@@ -102,15 +102,14 @@ class PreparePolicy():
         self.wolfPolicy = wolfPolicy
         self.distractorPolicy = distractorPolicy
     def __call__(self, agentStates, oldAgentActions, timeStep, wolfId, wolfSubtlety, action):
-        sheepState = agentStates[self.sheepId]
         oldSheepAction = oldAgentActions[self.sheepId]
         sheepPolicy = lambda sheepState: self.sheepPolicy(sheepState, action, oldSheepAction, timeStep)
         oldWolfAction = oldAgentActions[wolfId]
-        wolfState = agentStates[wolfId]
-        wolfPolicy = lambda oldWolfState : self.wolfPolicy(wolfState, sheepState, wolfSubtlety, oldWolfAction, timeStep)
+        sheepStateForWolfPolicy = agentStates[self.sheepId]
+        wolfPolicy = lambda wolfState : self.wolfPolicy(wolfState, sheepStateForWolfPolicy, wolfSubtlety, oldWolfAction, timeStep)
 
         agentPolicyFunctions = [lambda distractorState: self.distractorPolicy(distractorState, oldDistractiorAction, timeStep) for
-                distractorState, oldDistractiorAction in zip(agentStates, oldAgentActions)]
+                oldDistractiorAction in oldAgentActions]
         agentPolicyFunctions[self.sheepId] = sheepPolicy
         agentPolicyFunctions[wolfId] = wolfPolicy
         return agentPolicyFunctions
