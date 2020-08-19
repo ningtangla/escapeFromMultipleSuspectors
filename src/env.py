@@ -45,10 +45,10 @@ class TransiteStateWithoutActionChange():
         for frame in range(self.maxFrame):
             physicalState, beliefAndAttention = state 
             agentStates, agentActions, timeStep, wolfIdAndSubtlety = physicalState
-            if self.isTerminal(state):
-                break
             if self.renderOn == True:
                 self.render(state)
+            if self.isTerminal(state):
+                break
             newAgentStates, newAgentActions = self.transiteMultiAgentMotion(agentStates, agentActions) 
             newPhysicalState = [newAgentStates, newAgentActions, timeStep, wolfIdAndSubtlety]
             stateAfterNoActionChangeTransition = [newPhysicalState, beliefAndAttention]
@@ -73,7 +73,7 @@ class IsTerminal():
 
 
 class Render():
-    def __init__(self, numAgent, screen, surfaceWidth, surfaceHeight, screenColor, sheepColor, wolfColor, circleSize, saveImage, saveImageFile):
+    def __init__(self, numAgent, screen, surfaceWidth, surfaceHeight, screenColor, sheepColor, wolfColor, circleSize, saveImage, saveImageFile, isTerminal):
         self.numAgent = numAgent
         self.screen = screen
         self.surfaceWidth = surfaceWidth
@@ -84,6 +84,8 @@ class Render():
         self.circleSize = circleSize
         self.saveImage = saveImage
         self.saveImageFile = saveImageFile
+        self.isTerminal = isTerminal
+
     def __call__(self, state):
         physicalState, beliefAndAttention = state 
         agentStates, agentActions, timeStep, wolfIdAndSubtlety = physicalState
@@ -114,14 +116,25 @@ class Render():
                     pg.draw.circle(self.screen, np.array([0, 0, 255]), [np.int(oneAgentPosition[0]),np.int(oneAgentPosition[1])], 5*int(attentionStatus[i - 1]) + 10,
                             5*int(attentionStatus[i - 1]))
                 pg.draw.circle(self.screen, np.clip(circleColorList[i], 0, 255), [np.int(oneAgentPosition[0]),np.int(oneAgentPosition[1])], self.circleSize)
+                if self.isTerminal(state) and i == groundTruthWolf:
+                    pg.draw.circle(self.screen, np.array([255, 0, 0]), [np.int(oneAgentPosition[0]),np.int(oneAgentPosition[1])], int(self.circleSize*1.5))
+            
             pg.display.flip()
-            currentDir = os.getcwd()
-            parentDir = os.path.abspath(os.path.join(currentDir, os.pardir))
-            saveImageDir=parentDir+'/src/data/'+self.saveImageFile
             if self.saveImage==True:
+                currentDir = os.getcwd()
+                parentDir = os.path.abspath(os.path.join(currentDir, os.pardir))
+                saveImageDir=parentDir+'/src/data/'+self.saveImageFile
+                #if j == 1 :
+                #    saveImageDir=parentDir+'/src/data/'+self.saveImageFile+'/groundtruth'
+                if self.isTerminal(state):
+                    for pauseTimeIndex in range(90):
+                        filenameList = os.listdir(saveImageDir)
+                        pg.image.save(self.screen,saveImageDir+'/'+str(len(filenameList))+'.png')
+                        pg.time.wait(1)
+
                 filenameList = os.listdir(saveImageDir)
                 pg.image.save(self.screen,saveImageDir+'/'+str(len(filenameList))+'.png')
-            pg.time.wait(1)
+                pg.time.wait(1)
 
 class MctsRender():
     def __init__(self, numAgent, screen, surfaceWidth, surfaceHeight, screenColor, sheepColor, wolfColor, distractorColor, circleSize, saveImage, saveImageFile):

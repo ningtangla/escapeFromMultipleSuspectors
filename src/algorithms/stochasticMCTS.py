@@ -15,12 +15,11 @@ class CalculateScore:
         self_visit_count = child.num_visited
         action_prior = child.action_prior
 
+        exploration_rate = np.log((1 + parent_visit_count + self.c_base) / self.c_base) + self.c_init
+        u_score = exploration_rate * action_prior * np.sqrt(parent_visit_count) / float(1 + self_visit_count) 
         if self_visit_count == 0:
-            u_score = np.inf
             q_score = 0
         else:
-            exploration_rate = np.log((1 + parent_visit_count + self.c_base) / self.c_base) + self.c_init
-            u_score = exploration_rate * action_prior * np.sqrt(parent_visit_count) / float(1 + self_visit_count) 
             q_score = child.sum_value / self_visit_count
 
         score = q_score + u_score

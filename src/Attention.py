@@ -1,5 +1,6 @@
 import numpy as np 
-import pandas as pd 
+import pandas as pd
+import math 
 
 def modifyPrecisionForUntracked(attentionStatus,precisionPerSlot,precisionForUntracked):
     attentionStatus = attentionStatus
@@ -26,8 +27,9 @@ class CalDistancePriorOnAttentionSlot():
         centeredDistance = (distances - self.midDistance) / (self.rangeDistance / self.numStandardErrorInDistanceRange)
         prior = (np.tanh(-centeredDistance) + 1) / 2
         #adjustedPrior = np.array([probability if distance > self.minDistance else 0 for probability, distance in zip(prior, distances)])
-        adjustedPrior = prior
-        return adjustedPrior
+        #prior = np.array([math.ceil(max(0, (self.maxDistance - distance) / self.maxDistance)) for distance in distances])
+        #prior = 1
+        return prior
 
 class AttentionSwitch():
     def __init__(self,attentionLimitation, calDistancePriorOnAttentionSlot):
