@@ -81,11 +81,11 @@ class RunOneCondition:
         numTotalSimulationTimes = condition['totalNumSimulationTimes']
         
         numSub = 10
-        possibleSubtleties = [500, 11, 3.3, 1.83, 0.92, 0.31, 0.01]
         allResults = []
+        possibleTrialSubtleties = [80.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.01]
         for subIndex in range(numSub):
             meanEscapeOnConditions = {}
-            for chasingSubtlety in possibleSubtleties: 
+            for chasingSubtlety in possibleTrialSubtleties: 
 
                 print(numTree, chasingSubtlety, numTotalSimulationTimes, attentionType)
                 numActionSpace = 8
@@ -151,10 +151,12 @@ class RunOneCondition:
                
                 if attentionType == 'idealObserver':
                     attentionLimitation= 1
-                    precisionPerSlot=800.0
-                    precisionForUntracked=800.0
-                    memoryratePerSlot=1
-                    memoryrateForUntracked=1
+                    precisionPerSlot=100.0
+                    precisionForUntracked=100.0
+                    memoryratePerSlot=0.99
+                    memoryrateForUntracked=0.99
+                    minAttentionDistance = 50
+                    maxAttentionDistance = 51
                 if attentionType == 'preAttention':
                     attentionLimitation= 1
                     precisionPerSlot=2.5
@@ -186,7 +188,8 @@ class RunOneCondition:
                     memoryratePerSlot=0.7
                     memoryrateForUntracked=0.45
                 attention = Attention.AttentionToPrecisionAndDecay(precisionPerSlot, precisionForUntracked, memoryratePerSlot, memoryrateForUntracked)    
-                transferMultiAgentStatesToPositionDF = ba.TransferMultiAgentStatesToPositionDF(numAgent) 
+                transferMultiAgentStatesToPositionDF = ba.TransferMultiAgentStatesToPositionDF(numAgent)
+                possibleSubtleties = [80.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.01]
                 resetBeliefAndAttention = ba.ResetBeliefAndAttention(sheepId, suspectorIds, possibleSubtleties, attentionLimitation, transferMultiAgentStatesToPositionDF, attention)
                
                 attentionMinDistance = minAttentionDistance * distanceToVisualDegreeRatio
@@ -226,7 +229,7 @@ class RunOneCondition:
                 rewardFunction = reward.RewardFunctionTerminalPenalty(sheepId, aliveBouns, deathPenalty, isTerminal)  
 
                 cInit = 1
-                cBase = 30
+                cBase = 100
                 calculateScore = CalculateScore(cInit, cBase)
                 selectChild = SelectChild(calculateScore)
                 
@@ -264,8 +267,8 @@ class RunOneCondition:
 
                 meanEscape = np.mean([1 if len(trajectory) >= (maxRunningSteps - 1) else 0 for trajectory in trajectories])
                 meanEscapeOnConditions.update({chasingSubtlety: meanEscape})
+                print(meanEscapeOnConditions)
             allResults.append(meanEscapeOnConditions)
-            print(meanEscapeOnConditions)
             results = pd.DataFrame(allResults)
             getCSVSavePath = self.getCSVSavePathByCondition(condition)
             csvSavePath = getCSVSavePath({})
@@ -277,12 +280,13 @@ def drawPerformanceline(dataDf, axForDraw):
 
 def main():     
     manipulatedVariables = OrderedDict()
-    manipulatedVariables['attentionType'] = ['idealObserver', 'preAttention', 'attention3', 'hybrid3', 'attention4', 'hybrid4']
-    manipulatedVariables['minAttentionDistance'] = [7.5]
-    manipulatedVariables['maxAttentionDistance'] = [11.5, 15.5]
+    #manipulatedVariables['attentionType'] = ['idealObserver']
+    manipulatedVariables['attentionType'] = ['hybrid4','attention4']
+    #manipulatedVariables['attentionType'] = ['preAttention', 'attention4', 'hybrid4']
+    manipulatedVariables['minAttentionDistance'] = [0.5, 5.5, 10.5]
+    manipulatedVariables['maxAttentionDistance'] = [15.5, 20.5, 25.5]
     manipulatedVariables['numTrees'] = [2]
-    manipulatedVariables['totalNumSimulationTimes'] = [36, 72]#, 120]
-
+    manipulatedVariables['totalNumSimulationTimes'] = [120]
  
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
     parametersAllCondtion = [dict(list(specificValueParameter)) for specificValueParameter in productedValues]
@@ -299,6 +303,7 @@ def main():
     getCSVSavePathByCondition = lambda condition: tsl.GetSavePath(trajectoryDirectory, measurementEscapeExtension, condition)
     runOneCondition = RunOneCondition(getTrajectorySavePathByCondition, getCSVSavePathByCondition)
 
+    #runOneCondition(parametersAllCondtion[0])
     numCpuCores = os.cpu_count()
     numCpuToUse = int(0.9 * numCpuCores)
     runPool = mp.Pool(numCpuToUse)

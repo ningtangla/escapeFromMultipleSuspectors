@@ -116,6 +116,7 @@ class UpdatePhysicalStateImagedByBelief():
             
             posteriorAllHypothesesBeforeNormalization = np.exp(hypothesisInformation['logP'])
             posteriorAllHypotheses = posteriorAllHypothesesBeforeNormalization / (np.sum(posteriorAllHypothesesBeforeNormalization))
+            #print(posteriorAllHypotheses.values)#, np.sum(posteriorAllHypotheses))
             sampledHypothesisIndex = list(np.random.multinomial(1, posteriorAllHypotheses)).index(1)
             beliefWolfId, beliefSheepId, beliefWolfSubtlety = hypothesisInformation.index[sampledHypothesisIndex]
             

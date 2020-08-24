@@ -1,0 +1,6 @@
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(1runStochasticMCTS.py:34326): Gdk-CRITICAL **: 01:18:15.216: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+pygame 1.9.6
+Hello from the pygame community. https://www.pygame.org/contribute.html
