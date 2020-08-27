@@ -85,7 +85,7 @@ class RunOneCondition:
         
         numSub = 10
         allResults = []
-        possibleTrialSubtleties = [100.0, 3.3, 1.83, 0.92, 0.01]
+        possibleTrialSubtleties = [100.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001]
         for subIndex in range(numSub):
             meanEscapeOnConditions = {}
             for chasingSubtlety in possibleTrialSubtleties: 
@@ -190,7 +190,7 @@ class RunOneCondition:
                     memoryrateForUntracked=0.45
                 attention = Attention.AttentionToPrecisionAndDecay(precisionPerSlot, precisionForUntracked, memoryratePerSlot, memoryrateForUntracked)    
                 transferMultiAgentStatesToPositionDF = ba.TransferMultiAgentStatesToPositionDF(numAgent)
-                possibleSubtleties = [100.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.01]
+                possibleSubtleties = [100.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001]
                 resetBeliefAndAttention = ba.ResetBeliefAndAttention(sheepId, suspectorIds, possibleSubtleties, attentionLimitation, transferMultiAgentStatesToPositionDF, attention)
                
                 maxAttentionDistance = minAttentionDistance + rangeAttention
@@ -232,7 +232,7 @@ class RunOneCondition:
                 rewardRollout = lambda state, action, nextState: rewardFunction(state, action) 
 
                 cInit = 1
-                cBase = 100
+                cBase = 50
                 scoreChild = ScoreChild(cInit, cBase)
                 selectAction = SelectAction(scoreChild)
                 selectNextState = SelectNextState(selectAction)
@@ -288,15 +288,15 @@ def drawPerformanceline(dataDf, axForDraw):
 
 def main():     
     manipulatedVariables = OrderedDict()
-    manipulatedVariables['alphaForStateWidening'] = [0.5]
+    manipulatedVariables['alphaForStateWidening'] = [0.25, 0.5, 0.75]
     #manipulatedVariables['attentionType'] = ['idealObserver']
     manipulatedVariables['attentionType'] = ['hybrid4']
     #manipulatedVariables['attentionType'] = ['preAttention', 'attention4', 'hybrid4']
-    manipulatedVariables['CForStateWidening'] = [2, 3]
-    manipulatedVariables['minAttentionDistance'] = [5.5, 10.5, 15.5]
-    manipulatedVariables['rangeAttention'] = [2, 5, 10]
+    manipulatedVariables['CForStateWidening'] = [2]
+    manipulatedVariables['minAttentionDistance'] = [7.5, 10.5, 13.5]
+    manipulatedVariables['rangeAttention'] = [2, 4, 8]
     manipulatedVariables['numTrees'] = [2]
-    manipulatedVariables['numSimulationTimes'] = [43]
+    manipulatedVariables['numSimulationTimes'] = [33]
  
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
     parametersAllCondtion = [dict(list(specificValueParameter)) for specificValueParameter in productedValues]

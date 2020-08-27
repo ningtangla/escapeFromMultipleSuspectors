@@ -86,7 +86,7 @@ class RunOneCondition:
 
         numSub = 10
         allResults = []
-        possibleTrialSubtleties = [100.0, 3.3, 1.83, 0.92, 0.01]
+        possibleTrialSubtleties = [100.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001]
         for subIndex in range(numSub):
             meanEscapeOnConditions = {}
             for chasingSubtlety in possibleTrialSubtleties: 
@@ -186,7 +186,7 @@ class RunOneCondition:
                     memoryrateForUntracked=0.45
                 attention = Attention.AttentionToPrecisionAndDecay(precisionPerSlot, precisionForUntracked, memoryratePerSlot, memoryrateForUntracked)    
                 transferMultiAgentStatesToPositionDF = ba.TransferMultiAgentStatesToPositionDF(numAgent)
-                possibleSubtleties = [100.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.01]
+                possibleSubtleties = [100.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001]
                 resetBeliefAndAttention = ba.ResetBeliefAndAttention(sheepId, suspectorIds, possibleSubtleties, attentionLimitation, transferMultiAgentStatesToPositionDF, attention)
                
                 maxAttentionDistance = minAttentionDistance + rangeAttention
@@ -234,7 +234,7 @@ class RunOneCondition:
                 getActionPrior = lambda state : {action: 1/len(actionSpace) for action in actionSpace}
 
                 cInit = 1
-                cBase = 100
+                cBase = 50
                 scoreChild = ScoreChild(cInit, cBase)
                 selectAction = SelectAction(scoreChild)
                 selectNextState = SelectNextState(selectAction)
@@ -295,10 +295,10 @@ def main():
     manipulatedVariables['attentionType'] = ['hybrid4']
     #manipulatedVariables['attentionType'] = ['preAttention', 'attention4', 'hybrid4']
     manipulatedVariables['CForStateWidening'] = [2]
-    manipulatedVariables['minAttentionDistance'] = [5.5, 10.5]
-    manipulatedVariables['rangeAttention'] = [5, 10]
+    manipulatedVariables['minAttentionDistance'] = [7.5]
+    manipulatedVariables['rangeAttention'] = [4]
     manipulatedVariables['numTrees'] = [2]
-    manipulatedVariables['numSimulationTimes'] = [44]
+    manipulatedVariables['numSimulationTimes'] = [34]
     manipulatedVariables['actionRatio'] = [0.1, 0.3, 0.9]
  
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
