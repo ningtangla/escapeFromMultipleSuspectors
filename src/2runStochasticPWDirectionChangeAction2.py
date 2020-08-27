@@ -17,7 +17,7 @@ from algorithms.stochasticPW import ScoreChild, SelectAction, SelectNextState, I
 
 from simple1DEnv import TransitionFunction, RewardFunction, Terminal
 from visualize import draw
-import stochasticAgentsMotionSimulation as ag
+import stochasticAgentsMotionSimulationByDirectionChangeAction as ag
 import Attention
 import calPosterior
 import stochasticBeliefAndAttentionSimulation as ba
