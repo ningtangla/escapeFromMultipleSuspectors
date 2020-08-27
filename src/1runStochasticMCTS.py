@@ -283,8 +283,8 @@ def main():
     #manipulatedVariables['attentionType'] = ['idealObserver']
     manipulatedVariables['attentionType'] = ['hybrid4','attention4']
     #manipulatedVariables['attentionType'] = ['preAttention', 'attention4', 'hybrid4']
-    manipulatedVariables['minAttentionDistance'] = [0.5, 5.5, 10.5]
-    manipulatedVariables['maxAttentionDistance'] = [15.5, 20.5, 25.5]
+    manipulatedVariables['minAttentionDistance'] = [20.5, 40.5]
+    manipulatedVariables['maxAttentionDistance'] = [41.5]
     manipulatedVariables['numTrees'] = [2]
     manipulatedVariables['totalNumSimulationTimes'] = [120]
  

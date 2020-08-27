@@ -79,9 +79,9 @@ class RunOneCondition:
         alpha = condition['alphaForStateWidening']
         C = condition['CForStateWidening']
         minAttentionDistance = condition['minAttentionDistance']
-        maxAttentionDistance = condition['maxAttentionDistance']
+        rangeAttention = condition['rangeAttention']
         numTree = condition['numTrees']
-        numTotalSimulationTimes = condition['totalNumSimulationTimes']
+        numSimulations = condition['numSimulationTimes']
         
         numSub = 10
         allResults = []
@@ -90,7 +90,7 @@ class RunOneCondition:
             meanEscapeOnConditions = {}
             for chasingSubtlety in possibleTrialSubtleties: 
 
-                print(numTree, chasingSubtlety, numTotalSimulationTimes, attentionType)
+                print(numTree, chasingSubtlety, numSimulations, attentionType)
                 numActionSpace = 8
                 actionInterval = int(360/(numActionSpace))
                 actionSpace = [(np.cos(degreeInPolar), np.sin(degreeInPolar)) for degreeInPolar in np.arange(0, 360, actionInterval)/180 * math.pi] 
@@ -158,8 +158,6 @@ class RunOneCondition:
                     precisionForUntracked=100.0
                     memoryratePerSlot=0.99
                     memoryrateForUntracked=0.99
-                    minAttentionDistance = 50
-                    maxAttentionDistance = 51
                 if attentionType == 'preAttention':
                     attentionLimitation= 1
                     precisionPerSlot=2.5
@@ -195,6 +193,7 @@ class RunOneCondition:
                 possibleSubtleties = [100.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.01]
                 resetBeliefAndAttention = ba.ResetBeliefAndAttention(sheepId, suspectorIds, possibleSubtleties, attentionLimitation, transferMultiAgentStatesToPositionDF, attention)
                
+                maxAttentionDistance = minAttentionDistance + rangeAttention
                 attentionMinDistance = minAttentionDistance * distanceToVisualDegreeRatio
                 attentionMaxDistance = maxAttentionDistance * distanceToVisualDegreeRatio
                 numStandardErrorInDistanceRange = 4
@@ -249,7 +248,7 @@ class RunOneCondition:
                
                 numActionPlaned = 1
                 outputAction = OutputAction(numActionPlaned, actionSpace)
-                numSimulations = int(numTotalSimulationTimes/numTree)
+                #numSimulations = int(numTotalSimulationTimes/numTree)
                 
                 #sheepColorInMcts = np.array([0, 255, 0])
                 #wolfColorInMcts = np.array([255, 0, 0])
@@ -289,15 +288,15 @@ def drawPerformanceline(dataDf, axForDraw):
 
 def main():     
     manipulatedVariables = OrderedDict()
-    manipulatedVariables['alphaForStateWidening'] = [0.5]
+    manipulatedVariables['alphaForStateWidening'] = [0.25]
     #manipulatedVariables['attentionType'] = ['idealObserver']
     manipulatedVariables['attentionType'] = ['hybrid4']
     #manipulatedVariables['attentionType'] = ['preAttention', 'attention4', 'hybrid4']
-    manipulatedVariables['CForStateWidening'] = [2, 3]
-    manipulatedVariables['minAttentionDistance'] = [6.5, 10.5]
-    manipulatedVariables['maxAttentionDistance'] = [12.5, 16.5]
-    manipulatedVariables['numTrees'] = [1, 2, 3]
-    manipulatedVariables['totalNumSimulationTimes'] = [150]
+    manipulatedVariables['CForStateWidening'] = [2]
+    manipulatedVariables['minAttentionDistance'] = [5.5, 10.5, 15.5]
+    manipulatedVariables['rangeAttention'] = [2, 5, 10]
+    manipulatedVariables['numTrees'] = [2]
+    manipulatedVariables['numSimulationTimes'] = [40]
  
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
     parametersAllCondtion = [dict(list(specificValueParameter)) for specificValueParameter in productedValues]
