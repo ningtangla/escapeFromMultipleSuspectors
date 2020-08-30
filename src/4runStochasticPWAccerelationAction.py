@@ -83,10 +83,11 @@ class RunOneCondition:
         numTree = condition['numTrees']
         numSimulations = condition['numSimulationTimes']
         actionRatio = condition['actionRatio']
+        cBase = condition['cBase']
 
         numSub = 10
         allResults = []
-        possibleTrialSubtleties = [100.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001]
+        possibleTrialSubtleties = [3.3, 1.83, 0.92, 0.001]
         for subIndex in range(numSub):
             meanEscapeOnConditions = {}
             for chasingSubtlety in possibleTrialSubtleties: 
@@ -186,7 +187,7 @@ class RunOneCondition:
                     memoryrateForUntracked=0.45
                 attention = Attention.AttentionToPrecisionAndDecay(precisionPerSlot, precisionForUntracked, memoryratePerSlot, memoryrateForUntracked)    
                 transferMultiAgentStatesToPositionDF = ba.TransferMultiAgentStatesToPositionDF(numAgent)
-                possibleSubtleties = [100.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001]
+                possibleSubtleties = [50.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001]
                 resetBeliefAndAttention = ba.ResetBeliefAndAttention(sheepId, suspectorIds, possibleSubtleties, attentionLimitation, transferMultiAgentStatesToPositionDF, attention)
                
                 maxAttentionDistance = minAttentionDistance + rangeAttention
@@ -234,7 +235,7 @@ class RunOneCondition:
                 getActionPrior = lambda state : {action: 1/len(actionSpace) for action in actionSpace}
 
                 cInit = 1
-                cBase = 50
+                #cBase = 50
                 scoreChild = ScoreChild(cInit, cBase)
                 selectAction = SelectAction(scoreChild)
                 selectNextState = SelectNextState(selectAction)
@@ -290,16 +291,17 @@ def drawPerformanceline(dataDf, axForDraw):
 
 def main():     
     manipulatedVariables = OrderedDict()
-    manipulatedVariables['alphaForStateWidening'] = [0.5]
+    manipulatedVariables['alphaForStateWidening'] = [0.25]
     #manipulatedVariables['attentionType'] = ['idealObserver']
     manipulatedVariables['attentionType'] = ['hybrid4']
     #manipulatedVariables['attentionType'] = ['preAttention', 'attention4', 'hybrid4']
     manipulatedVariables['CForStateWidening'] = [2]
-    manipulatedVariables['minAttentionDistance'] = [7.5]
-    manipulatedVariables['rangeAttention'] = [4]
+    manipulatedVariables['minAttentionDistance'] = [6.5, 9.5, 12.5, 15.5]
+    manipulatedVariables['rangeAttention'] = [2, 4, 6, 8]
+    manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [2]
-    manipulatedVariables['numSimulationTimes'] = [34]
-    manipulatedVariables['actionRatio'] = [0.1, 0.3, 0.9]
+    manipulatedVariables['numSimulationTimes'] = [54, 74]
+    manipulatedVariables['actionRatio'] = [0.2]
  
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
     parametersAllCondtion = [dict(list(specificValueParameter)) for specificValueParameter in productedValues]
@@ -318,7 +320,7 @@ def main():
 
     #runOneCondition(parametersAllCondtion[0])
     numCpuCores = os.cpu_count()
-    numCpuToUse = int(0.9 * numCpuCores)
+    numCpuToUse = int(numCpuCores)
     runPool = mp.Pool(numCpuToUse)
     runPool.map(runOneCondition, parametersAllCondtion)
    
