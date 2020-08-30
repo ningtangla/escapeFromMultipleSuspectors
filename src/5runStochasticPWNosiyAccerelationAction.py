@@ -17,7 +17,7 @@ from algorithms.stochasticPW import ScoreChild, SelectAction, SelectNextState, I
 
 from simple1DEnv import TransitionFunction, RewardFunction, Terminal
 from visualize import draw
-import stochasticAgentsMotionSimulationByAccerelationAction as ag
+import stochasticAgentsMotionSimulationByNoisyAccerelationAction as ag
 import Attention
 import calPosterior
 import stochasticBeliefAndAttentionSimulation as ba
@@ -84,6 +84,8 @@ class RunOneCondition:
         numSimulations = condition['numSimulationTimes']
         actionRatio = condition['actionRatio']
         cBase = condition['cBase']
+        actionNoisePlay = condition['actionNoisePlay']
+        actionNoiseSim = condition['actionNoiseSim']
 
         numSub = 10
         allResults = []
@@ -115,7 +117,11 @@ class RunOneCondition:
                 minSheepSpeed = int(17.4 * distanceToVisualDegreeRatio/numFramePerSecond)
                 maxSheepSpeed = int(23.2 * distanceToVisualDegreeRatio/numFramePerSecond)
                 warmUpTimeSteps = int(10 * numMDPTimeStepPerSecond)
-                sheepPolicy = ag.SheepPolicy(sheepActionUpdateFrequency, minSheepSpeed, maxSheepSpeed, warmUpTimeSteps)
+                actionMagnitude = actionRatio * minSheepSpeed
+                actionNoiseMagPlay = actionMagnitude * actionNoisePlay
+                sheepPolicyInPlay = ag.SheepPolicy(sheepActionUpdateFrequency, minSheepSpeed, maxSheepSpeed, warmUpTimeSteps, actionNoiseMagPlay)
+                actionNoiseMagSim = actionNoiseMagPlay * actionNoiseSim
+                sheepPolicyInSim = ag.SheepPolicy(sheepActionUpdateFrequency, minSheepSpeed, maxSheepSpeed, warmUpTimeSteps, actionNoiseMagSim)
                 
                 wolfActionUpdateFrequency = int(0.2 * numMDPTimeStepPerSecond)
                 minWolfSpeed = int(8.7 * distanceToVisualDegreeRatio/numFramePerSecond)
@@ -125,8 +131,10 @@ class RunOneCondition:
                 minDistractorSpeed = int(8.7 * distanceToVisualDegreeRatio/numFramePerSecond)
                 maxDistractorSpeed = int(14.5 * distanceToVisualDegreeRatio/numFramePerSecond)
                 distractorPolicy = ag.DistractorPolicy(distractorActionUpdateFrequency, minDistractorSpeed, maxDistractorSpeed, warmUpTimeSteps)
-                preparePolicy = ag.PreparePolicy(sheepId, numAgent, sheepPolicy, wolfPolicy, distractorPolicy)
-                updatePhysicalState = ag.UpdatePhysicalState(sheepId, numAgent, preparePolicy)
+                preparePolicyInPlay = ag.PreparePolicy(sheepId, numAgent, sheepPolicyInPlay, wolfPolicy, distractorPolicy)
+                updatePhysicalStateInPlay = ag.UpdatePhysicalState(sheepId, numAgent, preparePolicyInPlay)
+                preparePolicyInSim = ag.PreparePolicy(sheepId, numAgent, sheepPolicyInSim, wolfPolicy, distractorPolicy)
+                updatePhysicalStateInSim = ag.UpdatePhysicalState(sheepId, numAgent, preparePolicyInSim)
 
                 xBoundary = [0, 640]
                 yBoundary = [0, 480]
@@ -216,10 +224,10 @@ class RunOneCondition:
                 updatePhysicalStateByBeliefFrequencyInPlay = np.inf
                 updatePhysicalStateByBeliefInPlay = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInPlay)
 
-                transitionFunctionInSimulation = env.TransitionFunction(resetPhysicalState, resetBeliefAndAttention, updatePhysicalState, transiteStateWithoutActionChangeInSimulation, 
+                transitionFunctionInSimulation = env.TransitionFunction(resetPhysicalState, resetBeliefAndAttention, updatePhysicalStateInSim, transiteStateWithoutActionChangeInSimulation, 
                         updateBeliefAndAttentionInSimulation, updatePhysicalStateByBeliefInSimulation)
 
-                transitionFunctionInPlay = env.TransitionFunction(resetPhysicalState, resetBeliefAndAttention, updatePhysicalState, transiteStateWithoutActionChangeInPlay, 
+                transitionFunctionInPlay = env.TransitionFunction(resetPhysicalState, resetBeliefAndAttention, updatePhysicalStateInPlay, transiteStateWithoutActionChangeInPlay, 
                         updateBeliefAndAttentionInPlay, updatePhysicalStateByBeliefInPlay)
                 
                 maxRollOutSteps = 5
@@ -230,7 +238,6 @@ class RunOneCondition:
 
                 numActionSpace = 8
                 actionInterval = int(360/(numActionSpace))
-                actionMagnitude = actionRatio * minSheepSpeed
                 actionSpace = [(np.cos(degreeInPolar) * actionMagnitude, np.sin(degreeInPolar) * actionMagnitude) for degreeInPolar in np.arange(0, 360, actionInterval)/180 * math.pi] 
                 getActionPrior = lambda state : {action: 1/len(actionSpace) for action in actionSpace}
 
@@ -296,12 +303,14 @@ def main():
     manipulatedVariables['attentionType'] = ['hybrid4']
     #manipulatedVariables['attentionType'] = ['preAttention', 'attention4', 'hybrid4']
     manipulatedVariables['CForStateWidening'] = [2]
-    manipulatedVariables['minAttentionDistance'] = [6.5]#, 9.5, 12.5, 15.5]
-    manipulatedVariables['rangeAttention'] = [2, 4, 6, 8]
+    manipulatedVariables['minAttentionDistance'] = [12.5, 17.5]
+    manipulatedVariables['rangeAttention'] = [4, 8]
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [2]
-    manipulatedVariables['numSimulationTimes'] = [73]
+    manipulatedVariables['numSimulationTimes'] = [75]
     manipulatedVariables['actionRatio'] = [0.2]
+    manipulatedVariables['actionNoisePlay'] = [0.03, 0.1, 0.3, 0.9]
+    manipulatedVariables['actionNoiseSim'] = [0.0]
  
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
     parametersAllCondtion = [dict(list(specificValueParameter)) for specificValueParameter in productedValues]
@@ -318,11 +327,11 @@ def main():
     getCSVSavePathByCondition = lambda condition: tsl.GetSavePath(trajectoryDirectory, measurementEscapeExtension, condition)
     runOneCondition = RunOneCondition(getTrajectorySavePathByCondition, getCSVSavePathByCondition)
 
-    #runOneCondition(parametersAllCondtion[0])
+    runOneCondition(parametersAllCondtion[0])
     numCpuCores = os.cpu_count()
     numCpuToUse = int(numCpuCores)
     runPool = mp.Pool(numCpuToUse)
-    runPool.map(runOneCondition, parametersAllCondtion)
+    #runPool.map(runOneCondition, parametersAllCondtion)
    
     precisionToSubtletyDict={500:0,50:5,11:30,3.3:60,1.83:90,0.92:120,0.31:150,0.001: 180}
     

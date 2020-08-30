@@ -71,13 +71,13 @@ class SheepPolicy():
         self.startMaxSheepSpeed = startMaxSheepSpeed
         self.endMaxSheepSpeed = endMaxSheepSpeed
         self.warmUpTimeSteps = warmUpTimeSteps
-        self.actionNoise = actionNoise
+        self.actionNoiseCov = np.diag([actionNoise] * 2)
     def __call__(self, sheepPos, sheepAccer, oldSheepVel, timeStep):
         if timeStep % self.updateFrequency == 0:
             warmUpRate = min(1, timeStep/self.warmUpTimeSteps)
             sheepMaxSpeed = self.startMaxSheepSpeed + (self.endMaxSheepSpeed - self.startMaxSheepSpeed) * warmUpRate
-            noisyAccer = np.random.multivariate_normal(sheepAccer, [self.actionNoise, self.actionNoise])
-            sheepVel = np.array(oldSheepVel) + np.array(sheepAccer)
+            noisyAccer = np.random.multivariate_normal(sheepAccer, self.actionNoiseCov)
+            sheepVel = np.array(oldSheepVel) + np.array(noisyAccer)
             sheepSpeed = np.linalg.norm(sheepVel, ord = 2)
             if sheepSpeed > sheepMaxSpeed:
                 sheepVel = np.array(sheepVel) / sheepSpeed * sheepMaxSpeed 
