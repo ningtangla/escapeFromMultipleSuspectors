@@ -87,7 +87,7 @@ class RunOneCondition:
 
         numSub = 10
         allResults = []
-        possibleTrialSubtleties = [3.3, 1.83, 0.92, 0.001]
+        possibleTrialSubtleties = [500.0]#[3.3, 1.83, 0.92, 0.001]
         for subIndex in range(numSub):
             meanEscapeOnConditions = {}
             for chasingSubtlety in possibleTrialSubtleties: 
@@ -300,7 +300,7 @@ def main():
     manipulatedVariables['rangeAttention'] = [2, 4, 6, 8]
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [2]
-    manipulatedVariables['numSimulationTimes'] = [54, 74]
+    manipulatedVariables['numSimulationTimes'] = [73]
     manipulatedVariables['actionRatio'] = [0.2]
  
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
