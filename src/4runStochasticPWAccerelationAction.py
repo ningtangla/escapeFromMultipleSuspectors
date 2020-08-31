@@ -17,10 +17,10 @@ from algorithms.stochasticPW import ScoreChild, SelectAction, SelectNextState, I
 
 from simple1DEnv import TransitionFunction, RewardFunction, Terminal
 from visualize import draw
-import stochasticAgentsMotionSimulationByAccerelationAction as ag
+import stochasticAgentsMotionSimulationByAccerelationActionBurnTime as ag
 import Attention
 import calPosterior
-import stochasticBeliefAndAttentionSimulation as ba
+import stochasticBeliefAndAttentionSimulationBurnTime as ba
 import env
 import reward
 import trajectoriesSaveLoad as tsl
@@ -84,10 +84,11 @@ class RunOneCondition:
         numSimulations = condition['numSimulationTimes']
         actionRatio = condition['actionRatio']
         cBase = condition['cBase']
+        burnTime = condition['burnTime']
 
         numSub = 10
         allResults = []
-        possibleTrialSubtleties = [500.0]#[3.3, 1.83, 0.92, 0.001]
+        possibleTrialSubtleties = [500.0, 3.3, 1.83, 0.92, 0.001]
         for subIndex in range(numSub):
             meanEscapeOnConditions = {}
             for chasingSubtlety in possibleTrialSubtleties: 
@@ -115,7 +116,7 @@ class RunOneCondition:
                 minSheepSpeed = int(17.4 * distanceToVisualDegreeRatio/numFramePerSecond)
                 maxSheepSpeed = int(23.2 * distanceToVisualDegreeRatio/numFramePerSecond)
                 warmUpTimeSteps = int(10 * numMDPTimeStepPerSecond)
-                sheepPolicy = ag.SheepPolicy(sheepActionUpdateFrequency, minSheepSpeed, maxSheepSpeed, warmUpTimeSteps)
+                sheepPolicy = ag.SheepPolicy(sheepActionUpdateFrequency, minSheepSpeed, maxSheepSpeed, warmUpTimeSteps, burnTime)
                 
                 wolfActionUpdateFrequency = int(0.2 * numMDPTimeStepPerSecond)
                 minWolfSpeed = int(8.7 * distanceToVisualDegreeRatio/numFramePerSecond)
@@ -187,7 +188,7 @@ class RunOneCondition:
                     memoryrateForUntracked=0.45
                 attention = Attention.AttentionToPrecisionAndDecay(precisionPerSlot, precisionForUntracked, memoryratePerSlot, memoryrateForUntracked)    
                 transferMultiAgentStatesToPositionDF = ba.TransferMultiAgentStatesToPositionDF(numAgent)
-                possibleSubtleties = [50.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001]
+                possibleSubtleties = [500.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001]
                 resetBeliefAndAttention = ba.ResetBeliefAndAttention(sheepId, suspectorIds, possibleSubtleties, attentionLimitation, transferMultiAgentStatesToPositionDF, attention)
                
                 maxAttentionDistance = minAttentionDistance + rangeAttention
@@ -201,12 +202,12 @@ class RunOneCondition:
                 attentionSwitchFrequencyInSimulation = np.inf
                 beliefUpdateFrequencyInSimulation = np.inf
                 updateBeliefAndAttentionInSimulation = ba.UpdateBeliefAndAttentionState(attention, computePosterior, attentionSwitch, transferMultiAgentStatesToPositionDF,
-                        attentionSwitchFrequencyInSimulation, beliefUpdateFrequencyInSimulation)
+                        attentionSwitchFrequencyInSimulation, beliefUpdateFrequencyInSimulation, burnTime)
 
                 attentionSwitchFrequencyInPlay = int(0.6 * numMDPTimeStepPerSecond)
                 beliefUpdateFrequencyInPlay = int(0.2 * numMDPTimeStepPerSecond)
                 updateBeliefAndAttentionInPlay = ba.UpdateBeliefAndAttentionState(attention, computePosterior, attentionSwitch, transferMultiAgentStatesToPositionDF, 
-                        attentionSwitchFrequencyInPlay, beliefUpdateFrequencyInPlay)
+                        attentionSwitchFrequencyInPlay, beliefUpdateFrequencyInPlay, burnTime)
 
                 updatePhysicalStateByBeliefFrequencyInSimulationRoot = int(0.6 * numMDPTimeStepPerSecond)
                 updatePhysicalStateByBeliefInSimulationRoot = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInSimulationRoot)
@@ -296,12 +297,13 @@ def main():
     manipulatedVariables['attentionType'] = ['hybrid4']
     #manipulatedVariables['attentionType'] = ['preAttention', 'attention4', 'hybrid4']
     manipulatedVariables['CForStateWidening'] = [2]
-    manipulatedVariables['minAttentionDistance'] = [6.5]#, 9.5, 12.5, 15.5]
-    manipulatedVariables['rangeAttention'] = [2, 4, 6, 8]
+    manipulatedVariables['minAttentionDistance'] = [6.5, 11.5, 16.5]
+    manipulatedVariables['rangeAttention'] = [2, 4, 8]
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [2]
-    manipulatedVariables['numSimulationTimes'] = [73]
+    manipulatedVariables['numSimulationTimes'] = [74]
     manipulatedVariables['actionRatio'] = [0.2]
+    manipulatedVariables['burnTime'] = [3, 6, 12]
  
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
     parametersAllCondtion = [dict(list(specificValueParameter)) for specificValueParameter in productedValues]

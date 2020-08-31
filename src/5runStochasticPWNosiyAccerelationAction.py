@@ -89,7 +89,7 @@ class RunOneCondition:
 
         numSub = 10
         allResults = []
-        possibleTrialSubtleties = [500.0]#[3.3, 1.83, 0.92, 0.001]
+        possibleTrialSubtleties = [500.0, 3.3, 1.83, 0.92, 0.001]
         for subIndex in range(numSub):
             meanEscapeOnConditions = {}
             for chasingSubtlety in possibleTrialSubtleties: 
@@ -195,7 +195,7 @@ class RunOneCondition:
                     memoryrateForUntracked=0.45
                 attention = Attention.AttentionToPrecisionAndDecay(precisionPerSlot, precisionForUntracked, memoryratePerSlot, memoryrateForUntracked)    
                 transferMultiAgentStatesToPositionDF = ba.TransferMultiAgentStatesToPositionDF(numAgent)
-                possibleSubtleties = [50.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001]
+                possibleSubtleties = [500.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001]
                 resetBeliefAndAttention = ba.ResetBeliefAndAttention(sheepId, suspectorIds, possibleSubtleties, attentionLimitation, transferMultiAgentStatesToPositionDF, attention)
                
                 maxAttentionDistance = minAttentionDistance + rangeAttention
@@ -303,14 +303,14 @@ def main():
     manipulatedVariables['attentionType'] = ['hybrid4']
     #manipulatedVariables['attentionType'] = ['preAttention', 'attention4', 'hybrid4']
     manipulatedVariables['CForStateWidening'] = [2]
-    manipulatedVariables['minAttentionDistance'] = [12.5, 17.5]
+    manipulatedVariables['minAttentionDistance'] = [9.5, 15.5]
     manipulatedVariables['rangeAttention'] = [4, 8]
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [2]
-    manipulatedVariables['numSimulationTimes'] = [75]
+    manipulatedVariables['numSimulationTimes'] = [76]
     manipulatedVariables['actionRatio'] = [0.2]
-    manipulatedVariables['actionNoisePlay'] = [0.03, 0.1, 0.3, 0.9]
-    manipulatedVariables['actionNoiseSim'] = [0.0]
+    manipulatedVariables['actionNoisePlay'] = [0.5, 1.0]
+    manipulatedVariables['actionNoiseSim'] = [0.0, 1.0]
  
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
     parametersAllCondtion = [dict(list(specificValueParameter)) for specificValueParameter in productedValues]
@@ -327,11 +327,11 @@ def main():
     getCSVSavePathByCondition = lambda condition: tsl.GetSavePath(trajectoryDirectory, measurementEscapeExtension, condition)
     runOneCondition = RunOneCondition(getTrajectorySavePathByCondition, getCSVSavePathByCondition)
 
-    runOneCondition(parametersAllCondtion[0])
+    #runOneCondition(parametersAllCondtion[0])
     numCpuCores = os.cpu_count()
     numCpuToUse = int(numCpuCores)
     runPool = mp.Pool(numCpuToUse)
-    #runPool.map(runOneCondition, parametersAllCondtion)
+    runPool.map(runOneCondition, parametersAllCondtion)
    
     precisionToSubtletyDict={500:0,50:5,11:30,3.3:60,1.83:90,0.92:120,0.31:150,0.001: 180}
     
