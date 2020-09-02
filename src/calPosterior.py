@@ -12,10 +12,10 @@ class CalPosteriorLog():
     def __call__(self, hypothesesInformation, observedData):    
         hypothesesInformation['chasingLikelihoodLog'] = calAngleLikelihoodLogModifiedForPiRange(observedData['wolfDeviation'], 1/(1/hypothesesInformation.index.get_level_values('chasingPrecision') + 1/hypothesesInformation['perceptionPrecision']))
         hypothesesInformation['escapingLikelihoodLog'] = 0
-        #originPrior = np.exp(hypothesesInformation['memoryDecay'] * hypothesesInformation['logP']).values
-        #normalizedPrior = originPrior/ np.sum(originPrior)  
-        #hypothesesInformation['beforeLogPAfterDecay'] = np.log(normalizedPrior)
-        hypothesesInformation['beforeLogPAfterDecay'] = hypothesesInformation['memoryDecay'] * hypothesesInformation['logP']
+        originPrior = np.exp(hypothesesInformation['logP']).values
+        normalizedPrior = np.maximum([1e-8] * len(originPrior), originPrior / np.sum(originPrior))  
+        hypothesesInformation['beforeLogPAfterDecay'] = np.log(normalizedPrior) * hypothesesInformation['memoryDecay']
+        #hypothesesInformation['beforeLogPAfterDecay'] = hypothesesInformation['memoryDecay'] * hypothesesInformation['logP']
         #print(np.exp(hypothesesInformation['logP']).values)
         #print('***', originPrior)
         #print('!!!', normalizedPrior)

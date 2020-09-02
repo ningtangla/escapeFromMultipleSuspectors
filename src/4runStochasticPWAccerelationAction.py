@@ -88,7 +88,7 @@ class RunOneCondition:
 
         numSub = 10
         allResults = []
-        possibleTrialSubtleties = [500.0, 3.3, 1.83, 0.92, 0.001]
+        possibleTrialSubtleties = [500.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001]
         for subIndex in range(numSub):
             meanEscapeOnConditions = {}
             for chasingSubtlety in possibleTrialSubtleties: 
@@ -270,7 +270,7 @@ class RunOneCondition:
                 runMCTSTrjactory = RunMCTSTrjactory(maxRunningSteps, numTree, numActionPlaned, sheepActionUpdateFrequency, transitionFunctionInPlay, isTerminal, makeDiffSimulationRoot, render)
 
                 rootAction = actionSpace[np.random.choice(range(numActionSpace))]
-                numTrial = 15
+                numTrial = 1
                 print(attentionLimitation, attentionMinDistance/distanceToVisualDegreeRatio, attentionMaxDistance/distanceToVisualDegreeRatio)
                 trajectories = [runMCTSTrjactory(pwMultipleTrees) for trial in range(numTrial)]
                
@@ -293,17 +293,17 @@ def drawPerformanceline(dataDf, axForDraw):
 def main():     
     manipulatedVariables = OrderedDict()
     manipulatedVariables['alphaForStateWidening'] = [0.25]
-    #manipulatedVariables['attentionType'] = ['idealObserver']
-    manipulatedVariables['attentionType'] = ['hybrid4']
-    #manipulatedVariables['attentionType'] = ['preAttention', 'attention4', 'hybrid4']
+    #manipulatedVariables['attentionType'] = ['idealObserver', 'hybrid4']
+    #manipulatedVariables['attentionType'] = ['hybrid4']
+    manipulatedVariables['attentionType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
     manipulatedVariables['CForStateWidening'] = [2]
-    manipulatedVariables['minAttentionDistance'] = [6.5, 11.5, 16.5]
-    manipulatedVariables['rangeAttention'] = [2, 4, 8]
+    manipulatedVariables['minAttentionDistance'] = [8.5, 12.5]
+    manipulatedVariables['rangeAttention'] = [3, 6]
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [2]
     manipulatedVariables['numSimulationTimes'] = [74]
     manipulatedVariables['actionRatio'] = [0.2]
-    manipulatedVariables['burnTime'] = [3, 6, 12]
+    manipulatedVariables['burnTime'] = [4, 5]
  
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
     parametersAllCondtion = [dict(list(specificValueParameter)) for specificValueParameter in productedValues]
