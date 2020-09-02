@@ -152,10 +152,11 @@ class RunOneCondition:
                
                 if attentionType == 'idealObserver':
                     attentionLimitation= 1
-                    precisionPerSlot=100.0
-                    precisionForUntracked=100.0
-                    memoryratePerSlot=0.99
-                    memoryrateForUntracked=0.99
+                    precisionPerSlot=500.0
+                    precisionForUntracked=500.0
+                    memoryratePerSlot=1.0
+                    memoryrateForUntracked=1.0
+                    minAttentionDistance = 50
                 if attentionType == 'preAttention':
                     attentionLimitation= 1
                     precisionPerSlot=2.5
