@@ -271,7 +271,7 @@ class RunOneCondition:
                 runMCTSTrjactory = RunMCTSTrjactory(maxRunningSteps, numTree, numActionPlaned, sheepActionUpdateFrequency, transitionFunctionInPlay, isTerminal, makeDiffSimulationRoot, render)
 
                 rootAction = actionSpace[np.random.choice(range(numActionSpace))]
-                numTrial = 1
+                numTrial = 15
                 print(attentionLimitation, attentionMinDistance/distanceToVisualDegreeRatio, attentionMaxDistance/distanceToVisualDegreeRatio)
                 trajectories = [runMCTSTrjactory(pwMultipleTrees) for trial in range(numTrial)]
                
