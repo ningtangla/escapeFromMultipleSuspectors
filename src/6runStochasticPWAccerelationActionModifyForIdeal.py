@@ -19,7 +19,7 @@ from simple1DEnv import TransitionFunction, RewardFunction, Terminal
 from visualize import draw
 import stochasticAgentsMotionSimulationByAccerelationActionBurnTime as ag
 import Attention
-import calPosterior
+import calPosteriorModifyForIdeal
 import stochasticBeliefAndAttentionSimulationBurnTime as ba
 import env
 import reward
@@ -134,7 +134,7 @@ class RunOneCondition:
                 checkBoundaryAndAdjust = ag.CheckBoundaryAndAdjust(xBoundary, yBoundary) 
                 transiteMultiAgentMotion = ag.TransiteMultiAgentMotion(checkBoundaryAndAdjust)
                
-                minDistance = 2.5 * distanceToVisualDegreeRatio
+                minDistance = 0.0 * distanceToVisualDegreeRatio
                 isTerminal = env.IsTerminal(sheepId, minDistance)
                # screen = pg.display.set_mode([xBoundary[1], yBoundary[1]])
                # screenColor = np.array([0, 0, 0])
@@ -197,7 +197,7 @@ class RunOneCondition:
                 numStandardErrorInDistanceRange = 4
                 calDistancePriorOnAttentionSlot = Attention.CalDistancePriorOnAttentionSlot(attentionMinDistance, attentionMaxDistance, numStandardErrorInDistanceRange)
                 attentionSwitch = Attention.AttentionSwitch(attentionLimitation, calDistancePriorOnAttentionSlot)    
-                computePosterior = calPosterior.CalPosteriorLog(minDistance)
+                computePosterior = calPosteriorModifyForIdeal.CalPosteriorLog(minDistance)
 
                 attentionSwitchFrequencyInSimulation = np.inf
                 beliefUpdateFrequencyInSimulation = np.inf
@@ -301,7 +301,7 @@ def main():
     manipulatedVariables['rangeAttention'] = [4]
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [2]
-    manipulatedVariables['numSimulationTimes'] = [74]
+    manipulatedVariables['numSimulationTimes'] = [76]
     manipulatedVariables['actionRatio'] = [0.2]
     manipulatedVariables['burnTime'] = [4]
  
