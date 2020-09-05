@@ -134,7 +134,7 @@ class RunOneCondition:
                 checkBoundaryAndAdjust = ag.CheckBoundaryAndAdjust(xBoundary, yBoundary) 
                 transiteMultiAgentMotion = ag.TransiteMultiAgentMotion(checkBoundaryAndAdjust)
                
-                minDistance = 0.0 * distanceToVisualDegreeRatio
+                minDistance = 2.5 * distanceToVisualDegreeRatio
                 isTerminal = env.IsTerminal(sheepId, minDistance)
                # screen = pg.display.set_mode([xBoundary[1], yBoundary[1]])
                # screenColor = np.array([0, 0, 0])

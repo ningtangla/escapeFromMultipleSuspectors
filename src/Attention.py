@@ -47,8 +47,8 @@ class AttentionSwitch():
         distanceBetweenWolfAndSheep = np.sqrt(np.sum(np.power(wolfLoc.values - sheepLoc.values, 2), axis = 1))
         distancePriorOnHypothesisAttention = self.calDistancePriorOnAttentionSlot(distanceBetweenWolfAndSheep)
         probabilityOnHypothesisAttention = np.exp(hypothesisInformation['logP']) * distancePriorOnHypothesisAttention
-        posteriorOnHypothesisAttention = probabilityOnHypothesisAttention/probabilityOnHypothesisAttention.sum()
-        probabilityOnAttentionSlotByGroupbySum = posteriorOnHypothesisAttention.groupby(['wolfIdentity','sheepIdentity']).sum().values
+        #posteriorOnHypothesisAttention = probabilityOnHypothesisAttention/probabilityOnHypothesisAttention.sum()
+        probabilityOnAttentionSlotByGroupbySum = probabilityOnHypothesisAttention.groupby(['wolfIdentity','sheepIdentity']).sum().values
         posteriorOnAttentionSlot = probabilityOnAttentionSlotByGroupbySum/np.sum(probabilityOnAttentionSlotByGroupbySum)
         
         #print('!!!', posteriorOnAttentionSlot, np.sum(posteriorOnAttentionSlot))
