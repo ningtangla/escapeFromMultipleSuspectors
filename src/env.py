@@ -113,8 +113,8 @@ class Render():
                 oneAgentState = agentStates[i]
                 oneAgentPosition = np.array(oneAgentState)
                 if i in attentionSlot:
-                    pg.draw.circle(self.screen, np.array([0, 0, 255]), [np.int(oneAgentPosition[0]),np.int(oneAgentPosition[1])], 5*int(attentionStatus[i - 1]) + 10,
-                            5*int(attentionStatus[i - 1]))
+                    pg.draw.circle(self.screen, np.array([0, 0, 255]), [np.int(oneAgentPosition[0]),np.int(oneAgentPosition[1])], 
+                            min(0, 5*int(attentionStatus[i - 1]) + 10), min(0, 5*int(attentionStatus[i - 1])))
                 pg.draw.circle(self.screen, np.clip(circleColorList[i], 0, 255), [np.int(oneAgentPosition[0]),np.int(oneAgentPosition[1])], self.circleSize)
                 if self.isTerminal(state) and i == groundTruthWolf:
                     pg.draw.circle(self.screen, np.array([255, 0, 0]), [np.int(oneAgentPosition[0]),np.int(oneAgentPosition[1])], int(self.circleSize*1.5))

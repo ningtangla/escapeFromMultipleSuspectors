@@ -62,7 +62,14 @@ class RunMCTSTrjactory:
                 #actionSpace = [(np.cos(degreeInPolar), np.sin(degreeInPolar)) for degreeInPolar in np.arange(0, 360, 8)/180 * math.pi] 
                 #actions = [actionSpace[np.random.choice(range(len(actionSpace)))]]
             action = actions[int(runningStep/self.actionUpdateFrequecy) % self.planFrequency]
-            trajectory.append([currState, action]) 
+            physicalState, beliefAndAttention = currState
+            hypothesisInformation, positionOldTimeDF = beliefAndAttention
+            probabilityOnHypothesisAttention = np.exp(hypothesisInformation['logP']) 
+            posteriorOnHypothesisAttention = probabilityOnHypothesisAttention/probabilityOnHypothesisAttention.sum()
+            probabilityOnAttentionSlotByGroupbySum = posteriorOnHypothesisAttention.groupby(['wolfIdentity','sheepIdentity']).sum().values
+            posterior = probabilityOnAttentionSlotByGroupbySum/np.sum(probabilityOnAttentionSlotByGroupbySum)
+            stateToRecord = [physicalState, posterior]
+            trajectory.append([stateToRecord, action]) 
             nextState = self.transitionFunctionInPlay(currState, action) 
             currState = nextState
         return trajectory
@@ -86,9 +93,9 @@ class RunOneCondition:
         cBase = condition['cBase']
         burnTime = condition['burnTime']
 
-        numSub = 10
+        numSub = 4
         allResults = []
-        possibleTrialSubtleties = [500.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001]
+        possibleTrialSubtleties = [500.0]#, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001]
         for subIndex in range(numSub):
             meanEscapeOnConditions = {}
             for chasingSubtlety in possibleTrialSubtleties: 
@@ -294,16 +301,16 @@ def main():
     manipulatedVariables = OrderedDict()
     manipulatedVariables['alphaForStateWidening'] = [0.25]
     #manipulatedVariables['attentionType'] = ['idealObserver', 'hybrid4']
-    #manipulatedVariables['attentionType'] = ['hybrid4']
+    #manipulatedVariables['attentionType'] = ['preAttention']
     manipulatedVariables['attentionType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
     manipulatedVariables['CForStateWidening'] = [2]
-    manipulatedVariables['minAttentionDistance'] = [7.0, 18.0, 29.0, 40.0]
+    manipulatedVariables['minAttentionDistance'] = [40.0]
     manipulatedVariables['rangeAttention'] = [4]
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [2]
-    manipulatedVariables['numSimulationTimes'] = [76]
+    manipulatedVariables['numSimulationTimes'] = [70]
     manipulatedVariables['actionRatio'] = [0.2]
-    manipulatedVariables['burnTime'] = [4]
+    manipulatedVariables['burnTime'] = [0]
  
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
     parametersAllCondtion = [dict(list(specificValueParameter)) for specificValueParameter in productedValues]

@@ -12,16 +12,17 @@ from anytree import RenderTree
 from collections import OrderedDict
 
 # Local import
-from algorithms.stochasticMCTS import MCTS, CalculateScore, GetActionPrior, SelectAction, SelectChild, Expand, RollOut, backup, InitializeChildren
+from algorithms.stochasticPW import ScoreChild, SelectAction, SelectNextState, InitializeChildren, Expand, ExpandNextState, \
+        PWidening, RollOut, backup, OutputAction, PWMultipleTrees
 
 from simple1DEnv import TransitionFunction, RewardFunction, Terminal
 from visualize import draw
-import stochasticAgentsMotionSimulationByDirectionChangeAction as ag
+import stochasticAgentsMotionSimulationByAccerelationActionBurnTimeWithDamp as ag
 import Attention
 import calPosterior
-import stochasticBeliefAndAttentionSimulation as ba
+import stochasticBeliefAndAttentionSimulationBurnTime as ba
 import env
-import reward
+import rewardWithActionCost as reward
 import trajectoriesSaveLoad as tsl
 
 class MakeDiffSimulationRoot():
@@ -32,7 +33,7 @@ class MakeDiffSimulationRoot():
         stateForSimulationRoot = self.updatePhysicalStateByBelief(state)
         while self.isTerminal(stateForSimulationRoot):
             stateForSimulationRoot = self.updatePhysicalStateByBelief(state)
-        rootNode = Node(id={action: stateForSimulationRoot}, num_visited=0, sum_value=0, is_expanded = False)
+        rootNode = Node(id={action: stateForSimulationRoot}, numVisited=0, sumValue=0, is_expanded = False)
         return rootNode
 
 class RunMCTSTrjactory:
@@ -71,7 +72,6 @@ class RunMCTSTrjactory:
             trajectory.append([stateToRecord, action]) 
             nextState = self.transitionFunctionInPlay(currState, action) 
             currState = nextState
- 
         return trajectory
 
 class RunOneCondition:
@@ -83,24 +83,24 @@ class RunOneCondition:
         
         getSavePath = self.getTrajectorySavePathByCondition(condition)
         attentionType = condition['attentionType']
-        minAttentionDistance = condition['minAttentionDistance']
-        maxAttentionDistance = condition['maxAttentionDistance']
+        alpha = condition['alphaForStateWidening']
+        C = condition['CForStateWidening']
+        cBase = condition['cBase']
         numTree = condition['numTrees']
-        numTotalSimulationTimes = condition['totalNumSimulationTimes']
-        
+        numSimulations = condition['numSimulationTimes']
+        actionRatio = condition['actionRatio']
+        burnTime = condition['burnTime']
+        damp = condition['damp']
+        actionCost = condition['actionCost']
+
         numSub = 10
         allResults = []
-        possibleTrialSubtleties = [80.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.01]
+        possibleTrialSubtleties = [500.0, 3.3, 1.83, 0.92, 0.001]
         for subIndex in range(numSub):
             meanEscapeOnConditions = {}
             for chasingSubtlety in possibleTrialSubtleties: 
 
-                print(numTree, chasingSubtlety, numTotalSimulationTimes, attentionType)
-                numActionSpace = 8
-                actionInterval = int(360/(numActionSpace))
-                actionSpace = [(np.cos(degreeInPolar), np.sin(degreeInPolar)) for degreeInPolar in np.arange(0, 360, actionInterval)/180 * math.pi] 
-                getActionPrior = GetActionPrior(actionSpace)
-
+                print(numTree, chasingSubtlety, numSimulations, attentionType)
                 numAgent = 25
                 sheepId = 0
                 suspectorIds = list(range(1, numAgent))
@@ -123,7 +123,7 @@ class RunOneCondition:
                 minSheepSpeed = int(17.4 * distanceToVisualDegreeRatio/numFramePerSecond)
                 maxSheepSpeed = int(23.2 * distanceToVisualDegreeRatio/numFramePerSecond)
                 warmUpTimeSteps = int(10 * numMDPTimeStepPerSecond)
-                sheepPolicy = ag.SheepPolicy(sheepActionUpdateFrequency, minSheepSpeed, maxSheepSpeed, warmUpTimeSteps)
+                sheepPolicy = ag.SheepPolicy(sheepActionUpdateFrequency, minSheepSpeed, maxSheepSpeed, warmUpTimeSteps, burnTime, damp)
                 
                 wolfActionUpdateFrequency = int(0.2 * numMDPTimeStepPerSecond)
                 minWolfSpeed = int(8.7 * distanceToVisualDegreeRatio/numFramePerSecond)
@@ -159,12 +159,10 @@ class RunOneCondition:
                
                 if attentionType == 'idealObserver':
                     attentionLimitation= 1
-                    precisionPerSlot=100.0
-                    precisionForUntracked=100.0
-                    memoryratePerSlot=0.99
-                    memoryrateForUntracked=0.99
-                    minAttentionDistance = 50
-                    maxAttentionDistance = 51
+                    precisionPerSlot=500.0
+                    precisionForUntracked=500.0
+                    memoryratePerSlot=1.0
+                    memoryrateForUntracked=1.0
                 if attentionType == 'preAttention':
                     attentionLimitation= 1
                     precisionPerSlot=2.5
@@ -197,9 +195,12 @@ class RunOneCondition:
                     memoryrateForUntracked=0.45
                 attention = Attention.AttentionToPrecisionAndDecay(precisionPerSlot, precisionForUntracked, memoryratePerSlot, memoryrateForUntracked)    
                 transferMultiAgentStatesToPositionDF = ba.TransferMultiAgentStatesToPositionDF(numAgent)
-                possibleSubtleties = [80.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.01]
+                possibleSubtleties = [500.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001]
                 resetBeliefAndAttention = ba.ResetBeliefAndAttention(sheepId, suspectorIds, possibleSubtleties, attentionLimitation, transferMultiAgentStatesToPositionDF, attention)
                
+                minAttentionDistance = 40.0
+                rangeAttention = 10.0
+                maxAttentionDistance = minAttentionDistance + rangeAttention
                 attentionMinDistance = minAttentionDistance * distanceToVisualDegreeRatio
                 attentionMaxDistance = maxAttentionDistance * distanceToVisualDegreeRatio
                 numStandardErrorInDistanceRange = 4
@@ -210,12 +211,12 @@ class RunOneCondition:
                 attentionSwitchFrequencyInSimulation = np.inf
                 beliefUpdateFrequencyInSimulation = np.inf
                 updateBeliefAndAttentionInSimulation = ba.UpdateBeliefAndAttentionState(attention, computePosterior, attentionSwitch, transferMultiAgentStatesToPositionDF,
-                        attentionSwitchFrequencyInSimulation, beliefUpdateFrequencyInSimulation)
+                        attentionSwitchFrequencyInSimulation, beliefUpdateFrequencyInSimulation, burnTime)
 
                 attentionSwitchFrequencyInPlay = int(0.6 * numMDPTimeStepPerSecond)
                 beliefUpdateFrequencyInPlay = int(0.2 * numMDPTimeStepPerSecond)
                 updateBeliefAndAttentionInPlay = ba.UpdateBeliefAndAttentionState(attention, computePosterior, attentionSwitch, transferMultiAgentStatesToPositionDF, 
-                        attentionSwitchFrequencyInPlay, beliefUpdateFrequencyInPlay)
+                        attentionSwitchFrequencyInPlay, beliefUpdateFrequencyInPlay, burnTime)
 
                 updatePhysicalStateByBeliefFrequencyInSimulationRoot = int(0.6 * numMDPTimeStepPerSecond)
                 updatePhysicalStateByBeliefInSimulationRoot = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInSimulationRoot)
@@ -234,32 +235,44 @@ class RunOneCondition:
                 maxRollOutSteps = 5
                 aliveBouns = 1/maxRollOutSteps
                 deathPenalty = -1
-                rewardFunction = reward.RewardFunctionTerminalPenalty(sheepId, aliveBouns, deathPenalty, isTerminal)  
+                rewardFunction = reward.RewardFunctionTerminalPenalty(sheepId, aliveBouns, actionCost, deathPenalty, isTerminal)  
+                rewardRollout = lambda state, action, nextState: rewardFunction(state, action) 
+
+                numActionSpace = 8
+                actionInterval = int(360/(numActionSpace))
+                actionMagnitude = actionRatio * minSheepSpeed
+                actionSpace = [(0, 0)] + [(np.cos(degreeInPolar) * actionMagnitude, np.sin(degreeInPolar) * actionMagnitude) for degreeInPolar in np.arange(0, 360, actionInterval)/180 * math.pi] 
+                getActionPrior = lambda state : {action: 1/len(actionSpace) for action in actionSpace}
 
                 cInit = 1
-                cBase = 100
-                calculateScore = CalculateScore(cInit, cBase)
-                selectChild = SelectChild(calculateScore)
+                #cBase = 50
+                scoreChild = ScoreChild(cInit, cBase)
+                selectAction = SelectAction(scoreChild)
+                selectNextState = SelectNextState(selectAction)
                 
                 initializeChildren = InitializeChildren(actionSpace, transitionFunctionInSimulation, getActionPrior)
                 expand = Expand(isTerminal, initializeChildren)
-
+                pWidening = PWidening(alpha, C)
+                expandNewState = ExpandNextState(transitionFunctionInSimulation, pWidening)
+                
                 rolloutPolicy = lambda state: actionSpace[np.random.choice(range(numActionSpace))]
-                rollout = RollOut(rolloutPolicy, maxRollOutSteps, transitionFunctionInSimulation, rewardFunction, isTerminal)
+                rolloutHeuristic = lambda state: 0
+                estimateValue = RollOut(rolloutPolicy, maxRollOutSteps, transitionFunctionInSimulation, rewardRollout, isTerminal, rolloutHeuristic)
                
                 numActionPlaned = 1
-                selectAction = SelectAction(numActionPlaned, actionSpace)
-                numSimulations = int(numTotalSimulationTimes/numTree)
+                outputAction = OutputAction(numActionPlaned, actionSpace)
+                #numSimulations = int(numTotalSimulationTimes/numTree)
                 
                 #sheepColorInMcts = np.array([0, 255, 0])
                 #wolfColorInMcts = np.array([255, 0, 0])
                 #distractorColorInMcts = np.array([255, 255, 255])
                 #saveImageMCTS = True
                 #mctsRender = env.MctsRender(numAgent, screen, xBoundary[1], yBoundary[1], screenColor, sheepColorInMcts, wolfColorInMcts, distractorColorInMcts, circleSize, saveImageMCTS, saveImageFile)
-                mctsRenderOn = False
-                mctsRender = None
-                pg.init()
-                mcts = MCTS(numSimulations, selectChild, expand, rollout, backup, selectAction, mctsRender, mctsRenderOn)
+                #mctsRenderOn = False
+                #mctsRender = None
+                #pg.init()
+                #mcts = MCTS(numSimulations, selectChild, expand, rollout, backup, selectAction, mctsRender, mctsRenderOn)
+                pwMultipleTrees = PWMultipleTrees(numSimulations, selectAction, selectNextState, expand, expandNewState, estimateValue, backup, outputAction)
                 
                 maxRunningSteps = int(25 * numMDPTimeStepPerSecond)
                 makeDiffSimulationRoot = MakeDiffSimulationRoot(isTerminal, updatePhysicalStateByBeliefInSimulationRoot)
@@ -268,7 +281,7 @@ class RunOneCondition:
                 rootAction = actionSpace[np.random.choice(range(numActionSpace))]
                 numTrial = 15
                 print(attentionLimitation, attentionMinDistance/distanceToVisualDegreeRatio, attentionMaxDistance/distanceToVisualDegreeRatio)
-                trajectories = [runMCTSTrjactory(mcts) for trial in range(numTrial)]
+                trajectories = [runMCTSTrjactory(pwMultipleTrees) for trial in range(numTrial)]
                
                 savePath = getSavePath({'chasingSubtlety': chasingSubtlety, 'subIndex': subIndex})
                 tsl.saveToPickle(trajectories, savePath)
@@ -288,13 +301,18 @@ def drawPerformanceline(dataDf, axForDraw):
 
 def main():     
     manipulatedVariables = OrderedDict()
-    #manipulatedVariables['attentionType'] = ['idealObserver']
-    manipulatedVariables['attentionType'] = ['hybrid4','attention4']
-    #manipulatedVariables['attentionType'] = ['preAttention', 'attention4', 'hybrid4']
-    manipulatedVariables['minAttentionDistance'] = [20.5, 40.5]
-    manipulatedVariables['maxAttentionDistance'] = [41.5]
+    manipulatedVariables['alphaForStateWidening'] = [0.25]
+    #manipulatedVariables['attentionType'] = ['idealObserver', 'hybrid4']
+    manipulatedVariables['attentionType'] = ['preAttention', 'hybrid4']
+    #manipulatedVariables['attentionType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
+    manipulatedVariables['CForStateWidening'] = [2]
+    manipulatedVariables['cBase'] = [40, 80]
     manipulatedVariables['numTrees'] = [2]
-    manipulatedVariables['totalNumSimulationTimes'] = [120]
+    manipulatedVariables['numSimulationTimes'] = [60, 90]
+    manipulatedVariables['actionRatio'] = [0.2]
+    manipulatedVariables['burnTime'] = [0]
+    manipulatedVariables['actionCost'] = [0.0, 0.01, 0.05, 0.1]
+    manipulatedVariables['damp'] = [0.0, 0.25]
  
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
     parametersAllCondtion = [dict(list(specificValueParameter)) for specificValueParameter in productedValues]
@@ -313,7 +331,7 @@ def main():
 
     #runOneCondition(parametersAllCondtion[0])
     numCpuCores = os.cpu_count()
-    numCpuToUse = int(0.9 * numCpuCores)
+    numCpuToUse = int(numCpuCores)
     runPool = mp.Pool(numCpuToUse)
     runPool.map(runOneCondition, parametersAllCondtion)
    

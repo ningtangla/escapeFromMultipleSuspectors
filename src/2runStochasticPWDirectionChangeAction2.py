@@ -61,11 +61,19 @@ class RunMCTSTrjactory:
                 actions = mcts(rootNodes)
                 #actionSpace = [(np.cos(degreeInPolar), np.sin(degreeInPolar)) for degreeInPolar in np.arange(0, 360, 8)/180 * math.pi] 
                 #actions = [actionSpace[np.random.choice(range(len(actionSpace)))]]
+
             action = actions[int(runningStep/self.actionUpdateFrequecy) % self.planFrequency]
-            trajectory.append([currState, action]) 
+            physicalState, beliefAndAttention = currState
+            hypothesisInformation, positionOldTimeDF = beliefAndAttention
+            probabilityOnHypothesisAttention = np.exp(hypothesisInformation['logP']) 
+            posteriorOnHypothesisAttention = probabilityOnHypothesisAttention/probabilityOnHypothesisAttention.sum()
+            probabilityOnAttentionSlotByGroupbySum = posteriorOnHypothesisAttention.groupby(['wolfIdentity','sheepIdentity']).sum().values
+            posterior = probabilityOnAttentionSlotByGroupbySum/np.sum(probabilityOnAttentionSlotByGroupbySum)
+            stateToRecord = [physicalState, posterior]
+            trajectory.append([stateToRecord, action]) 
             nextState = self.transitionFunctionInPlay(currState, action) 
             currState = nextState
-        return trajectory
+       return trajectory
 
 class RunOneCondition:
     def __init__(self, getTrajectorySavePathByCondition, getCSVSavePathByCondition):
