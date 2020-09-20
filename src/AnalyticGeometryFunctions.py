@@ -10,9 +10,11 @@ def computeAngleBetweenVectors(vector1, vector2):
     vectoriseInnerProduct = np.dot(vector1, vector2.T)
     if np.ndim(vectoriseInnerProduct) > 0:
         innerProduct = vectoriseInnerProduct.diagonal()
+        normProduct = computeVectorNorm(vector1) * computeVectorNorm(vector2)
     else:
         innerProduct = vectoriseInnerProduct
-    angle = np.arccos(innerProduct/(computeVectorNorm(vector1) * computeVectorNorm(vector2)))
+        normProduct = np.linalg.norm(vector1) * np.linalg.norm(vector2)
+    angle = np.arccos(innerProduct / normProduct)
     return angle
 
 def computeVectorNorm(vector):

@@ -97,7 +97,7 @@ class UpdateBeliefAndAttentionState():
             posteriorHypothesisDF = self.computePosterior(hypothesisInformation,observeDF)
             hypothesisInformation = posteriorHypothesisDF.copy()
             positionOldTimeDF = positionCurrentTimeDF.copy()
-        if timeStep % self.attentionSwitchFrequency == 0:
+        if (timeStep % self.attentionSwitchFrequency == 0) and (timeStep > self.burnTime):
             hypothesisInformation = self.attentionSwitch(hypothesisInformation, positionOldTimeDF)
             attentionStatusDF = hypothesisInformation['attentionStatus']
             [precisionHypothesisDF,decayHypothesisDF]=self.attention(attentionStatusDF)

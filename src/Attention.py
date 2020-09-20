@@ -50,7 +50,7 @@ class AttentionSwitch():
         #posteriorOnHypothesisAttention = probabilityOnHypothesisAttention/probabilityOnHypothesisAttention.sum()
         probabilityOnAttentionSlotByGroupbySum = probabilityOnHypothesisAttention.groupby(['wolfIdentity','sheepIdentity']).sum().values
         posteriorOnAttentionSlot = probabilityOnAttentionSlotByGroupbySum/np.sum(probabilityOnAttentionSlotByGroupbySum)
-        
+        #print(posteriorOnAttentionSlot) 
         #print('!!!', posteriorOnAttentionSlot, np.sum(posteriorOnAttentionSlot))
         numOtherCondtionBeyondPair = hypothesisInformation.groupby(['wolfIdentity','sheepIdentity']).size().values[0]
         newAttentionStatus=list(np.random.multinomial(self.attentionLimitation, posteriorOnAttentionSlot))*numOtherCondtionBeyondPair
