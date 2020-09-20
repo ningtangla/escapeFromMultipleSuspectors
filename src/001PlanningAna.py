@@ -353,7 +353,6 @@ class RunOneCondition:
                         #print(wolfId, '**', wolfIdInEach)
                         if (timeStepIndex % 3 == 0) and timeStepIndex >= startStatsIndex:
                             IdAndSubtletyAcc = [(IdAndSubtlety[0] == wolfId) and (IdAndSubtlety[1] == wolfSubtlety) for IdAndSubtlety in timeStep[5]]
-                            print(timeStep[5], [wolfId, wolfSubtlety])
                             AccTrial.append(IdAndSubtletyAcc)
                     meanAcc = np.mean(AccTrial)
                     return meanAcc
