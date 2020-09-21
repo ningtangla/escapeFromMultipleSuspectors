@@ -216,7 +216,7 @@ class RunOneCondition:
                 updateBeliefAndAttentionInPlay = ba.UpdateBeliefAndAttentionState(attention, computePosterior, attentionSwitch, transferMultiAgentStatesToPositionDF, 
                         attentionSwitchFrequencyInPlay, beliefUpdateFrequencyInPlay, burnTime)
 
-                updatePhysicalStateByBeliefFrequencyInSimulationRoot = int(0.6 * numMDPTimeStepPerSecond)
+                updatePhysicalStateByBeliefFrequencyInSimulationRoot = int(0.2 * numMDPTimeStepPerSecond)
                 updatePhysicalStateByBeliefInSimulationRoot = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInSimulationRoot)
                 updatePhysicalStateByBeliefFrequencyInSimulation = np.inf
                 updatePhysicalStateByBeliefInSimulation = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInSimulation)

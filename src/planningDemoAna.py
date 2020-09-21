@@ -35,8 +35,8 @@ def main():
     alphaForStateWidening = 0.25
     CForStateWidening = 2
     cBase = 50
-    numTrees = 2
-    numSimulationTimes = 71
+    numTrees = 1
+    numSimulationTimes = 1
     trajectoryFixedParameters = {'alphaForStateWidening': alphaForStateWidening, 'CForStateWidening': CForStateWidening,
             'cBase': cBase, 'numTrees': numTrees, 'numSimulationTimes': numSimulationTimes}
     trajectoryExtension = '.pickle'
@@ -45,15 +45,15 @@ def main():
     # Compute Statistics on the Trajectories
     loadTrajectories = LoadTrajectories(getTrajectorySavePath, loadFromPickle)
     minAttentionDistance = 40.0
-    rangeAttention = 10.0
+    rangeAttention = 10.1
     actionRatio = 0.2
     burnTime = 0
     trajectoryParameters = {'minAttentionDistance': minAttentionDistance, 'rangeAttention': rangeAttention, 'actionRatio': actionRatio, 
             'burnTime': burnTime}
     chasingSubtlety = 500.0
-    subIndex = 1
-    #attentionType = 'preAttention'
-    attentionType = 'hybrid4'
+    subIndex = 0
+    attentionType = 'preAttention'
+    #attentionType = 'hybrid4'
     trajectoryParameters.update({'chasingSubtlety': chasingSubtlety, 'subIndex': subIndex, 'attentionType': attentionType})
 
     trajectories = loadTrajectories(trajectoryParameters) 
@@ -75,7 +75,7 @@ def main():
     circleSize = 10
     positionIndex = [0, 1]
     agentIdsToDraw = list(range(numSheep + numWolves))
-    saveImage = False
+    saveImage = True
     imageSavePath = os.path.join(trajectoryDirectory, 'picMovingSheep')
     if not os.path.exists(imageSavePath):
         os.makedirs(imageSavePath)

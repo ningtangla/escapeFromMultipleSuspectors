@@ -119,7 +119,7 @@ class RunOneCondition:
         cBase = condition['cBase']
         burnTime = condition['burnTime']
 
-        numSub = 3
+        numSub = 1
         allPerceptionResults = []
         allActionResults = []
         allVelDiffResults = []
@@ -171,7 +171,7 @@ class RunOneCondition:
                 checkBoundaryAndAdjust = ag.CheckBoundaryAndAdjust(xBoundary, yBoundary) 
                 transiteMultiAgentMotion = ag.TransiteMultiAgentMotion(checkBoundaryAndAdjust)
                
-                minDistance = 2.5 * distanceToVisualDegreeRatio
+                minDistance = 0.0 * distanceToVisualDegreeRatio
                 isTerminal = env.IsTerminal(sheepId, minDistance)
                # screen = pg.display.set_mode([xBoundary[1], yBoundary[1]])
                # screenColor = np.array([0, 0, 0])
@@ -275,7 +275,7 @@ class RunOneCondition:
                 updateBeliefAndAttentionInPlay = ba.UpdateBeliefAndAttentionState(attention, computePosterior, attentionSwitch, transferMultiAgentStatesToPositionDF, 
                         attentionSwitchFrequencyInPlay, beliefUpdateFrequencyInPlay, burnTime)
 
-                updatePhysicalStateByBeliefFrequencyInSimulationRoot = int(0.6 * numMDPTimeStepPerSecond)
+                updatePhysicalStateByBeliefFrequencyInSimulationRoot = int(0.2 * numMDPTimeStepPerSecond)
                 updatePhysicalStateByBeliefInSimulationRoot = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInSimulationRoot)
                 updatePhysicalStateByBeliefFrequencyInSimulation = np.inf
                 updatePhysicalStateByBeliefInSimulation = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInSimulation)
@@ -346,12 +346,12 @@ class RunOneCondition:
                 startStatsIndex = 1
                 def getTrueWolfIdSubtletyAcc(trajectory):
                     AccTrial = []
-                    for timeStepIndex in range(len(trajectory)):
+                    for timeStepIndex in range(len(trajectory) - 2):
                         timeStep = trajectory[timeStepIndex]
                         wolfId = timeStep[0][0][3][0]
                         wolfSubtlety = timeStep[0][0][3][1]
                         #print(wolfId, '**', wolfIdInEach)
-                        if (timeStepIndex % 3 == 0) and timeStepIndex >= startStatsIndex:
+                        if timeStepIndex >= startStatsIndex:
                             IdAndSubtletyAcc = [(IdAndSubtlety[0] == wolfId) and (IdAndSubtlety[1] == wolfSubtlety) for IdAndSubtlety in timeStep[5]]
                             AccTrial.append(IdAndSubtletyAcc)
                     meanAcc = np.mean(AccTrial)
@@ -361,7 +361,7 @@ class RunOneCondition:
                 
                 def getActionDeviationLevel(trajectory):
                     AccTrial = []
-                    for timeStepIndex in range(len(trajectory)):
+                    for timeStepIndex in range(len(trajectory) - 2):
                         timeStep = trajectory[timeStepIndex]
                         actionReal = np.array(timeStep[1])
                         actionOnTruth = np.array(timeStep[4])
@@ -375,7 +375,7 @@ class RunOneCondition:
                 
                 def getVelocityDiff(trajectory):
                     AccTrial = []
-                    for timeStepIndex in range(len(trajectory)):
+                    for timeStepIndex in range(len(trajectory) - 2):
                         timeStep = trajectory[timeStepIndex]
                         velReal = np.array(timeStep[0][0][0][1][0])
                         velWithActionOnTruth = np.array(timeStep[2][1][0])
@@ -432,7 +432,7 @@ def main():
     manipulatedVariables['rangeAttention'] = [10.1]
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [1, 2]
-    manipulatedVariables['numSimulationTimes'] = [72]
+    manipulatedVariables['numSimulationTimes'] = [1]
     manipulatedVariables['actionRatio'] = [0.2]
     manipulatedVariables['burnTime'] = [0]
  

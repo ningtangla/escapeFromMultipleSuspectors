@@ -139,14 +139,14 @@ class DrawPlanningAna:
             pg.draw.circle(self.screen, agentColor, agentPos, self.circleSize)
 
         sheepPos = state[0]
-        print(sheepPos) 
+        
         sampledPos = state[sampledId]
         heatSeekingSampled = (sheepPos - sampledPos) / np.linalg.norm((sheepPos - sampledPos))# * (self.circleSize + 15)
         pg.draw.circle(self.screen, [255, 255, 0], [int(dim) for dim in sampledPos], self.circleSize + 5, 5)
         centerAngeledSampled = np.arctan2(heatSeekingSampled[1], heatSeekingSampled[0])
         starAngleSampled = - centerAngeledSampled - sampledSubtlety / 180 * math.pi
         endAngleSampled = - centerAngeledSampled + sampledSubtlety / 180 * math.pi
-        pg.draw.arc(self.screen, [255, 255, 0], [int(sampledPos[0]) - 25, int(sampledPos[1]) - 25, 50, 50], starAngleSampled, endAngleSampled, 5) 
+        pg.draw.arc(self.screen, [255, 255, 0], [int(sampledPos[0]) - 28, int(sampledPos[1]) - 28, 56, 56], starAngleSampled, endAngleSampled, 7) 
         
         truthPos = state[truthId]
         heatSeekingTruth = (sheepPos - truthPos) / np.linalg.norm((sheepPos - truthPos))# * (self.circleSize + 10)
@@ -154,12 +154,12 @@ class DrawPlanningAna:
         centerAngeledTruth = np.arctan2(heatSeekingTruth[1], heatSeekingTruth[0])
         starAngleTruth = - centerAngeledTruth - truthSubtlety / 180 * math.pi 
         endAngleTruth = - centerAngeledTruth + truthSubtlety / 180 * math.pi
-        pg.draw.arc(self.screen, [255, 0, 0], [int(truthPos[0]) - 20, int(truthPos[1]) - 20, 40, 40], starAngleTruth, endAngleTruth, 5) 
+        pg.draw.arc(self.screen, [255, 0, 0], [int(truthPos[0]) - 23, int(truthPos[1]) - 23, 46, 46], starAngleTruth, endAngleTruth, 7) 
 
-        actionLine = np.array(action) / (np.linalg.norm(action) + 1e-12) * (self.circleSize + 15)
+        actionLine = np.array(action) / (np.linalg.norm(action) + 1e-12) * (self.circleSize + 20)
         pg.draw.line(self.screen, [255, 255, 0], [int(dim) for dim in sheepPos], [int(dim) for dim in sheepPos + actionLine], 5)
         
-        actionTruthLine = np.array(actionOnTruth) / (np.linalg.norm(actionOnTruth) + 1e-12) * (self.circleSize + 10)
+        actionTruthLine = np.array(actionOnTruth) / (np.linalg.norm(actionOnTruth) + 1e-12) * (self.circleSize + 15)
         pg.draw.line(self.screen, [255, 0, 0], [int(dim) for dim in sheepPos], [int(dim) for dim in sheepPos + actionTruthLine], 5)
 
         pg.display.flip()
@@ -168,10 +168,10 @@ class DrawPlanningAna:
             if self.saveImage == True:
                 filenameList = os.listdir(self.imagePath)
                 pg.image.save(self.screen, self.imagePath + '/' + str(len(filenameList))+'.png')
-        velLine = np.array(nextSheepVel) / (np.linalg.norm(nextSheepVel) + 1e-12) * (self.circleSize + 30)
+        velLine = np.array(nextSheepVel) / (np.linalg.norm(nextSheepVel) + 1e-12) * (self.circleSize + 35)
         pg.draw.line(self.screen, [255, 255, 0], [int(dim) for dim in sheepPos], [int(dim) for dim in sheepPos + velLine], 10)
         
-        velTruthLine = np.array(nextSheepVelOnTruth) / (np.linalg.norm(nextSheepVelOnTruth) + 1e-12) * (self.circleSize + 20)
+        velTruthLine = np.array(nextSheepVelOnTruth) / (np.linalg.norm(nextSheepVelOnTruth) + 1e-12) * (self.circleSize + 25)
         pg.draw.line(self.screen, [255, 0, 0], [int(dim) for dim in sheepPos], [int(dim) for dim in sheepPos + velTruthLine], 10)
         
         pg.display.flip()
@@ -181,7 +181,6 @@ class DrawPlanningAna:
                 filenameList = os.listdir(self.imagePath)
                 pg.image.save(self.screen, self.imagePath + '/' + str(len(filenameList))+'.png')
 
-        __import__('ipdb').set_trace() 
         fpsClock.tick(self.fps)
         return self.screen
 
@@ -195,7 +194,7 @@ class ChaseTrialWithTraj:
         self.drawPlanningAna = drawPlanningAna
 
     def __call__(self, trajectory):
-        for timeStepIndex in range(len(trajectory) - 1):
+        for timeStepIndex in range(len(trajectory) - 2):
             stateInSheepMind = trajectory[timeStepIndex][0]
             physicalState, posteriorInState = stateInSheepMind
             agentStates, agentActions, timeStep, wolfIdAndSubtlety = physicalState
