@@ -119,15 +119,17 @@ class RunOneCondition:
         cBase = condition['cBase']
         burnTime = condition['burnTime']
 
-        numSub = 1
+        numSub = 3
         allPerceptionResults = []
         allActionResults = []
         allVelDiffResults = []
+        allResults = []
         possibleTrialSubtleties = [500.0, 3.3, 0.92]
         for subIndex in range(numSub):
             meanPerceptionOnConditions = {}
             meanActionOnConditions = {}
             meanVelDiffOnConditions = {}
+            meanEscapeOnConditions = {}
             for chasingSubtlety in possibleTrialSubtleties: 
 
                 print(numTree, chasingSubtlety, numSimulations, attentionType)
@@ -171,7 +173,7 @@ class RunOneCondition:
                 checkBoundaryAndAdjust = ag.CheckBoundaryAndAdjust(xBoundary, yBoundary) 
                 transiteMultiAgentMotion = ag.TransiteMultiAgentMotion(checkBoundaryAndAdjust)
                
-                minDistance = 0.0 * distanceToVisualDegreeRatio
+                minDistance = 2.5 * distanceToVisualDegreeRatio
                 isTerminal = env.IsTerminal(sheepId, minDistance)
                # screen = pg.display.set_mode([xBoundary[1], yBoundary[1]])
                # screenColor = np.array([0, 0, 0])
@@ -390,15 +392,15 @@ class RunOneCondition:
                 meanVelDiff = np.mean([getVelocityDiff(trajectory) for trajectory in trajectories])
                 meanVelDiffOnConditions.update({chasingSubtlety: meanVelDiff})
             
-                #getTrueWolfIndentityAcc = lambda trajectory: np.mean(np.array([timeStep[0][1][int(timeStep[0][0][3][0] - 1)] for timeStep in trajectory])[11:])
-                #meanIdentityPerception = np.mean([getTrueWolfIndentityAcc(trajectory) for trajectory in trajectories])
-                #meanIdentityPerceptionOnConditions.update({chasingSubtlety: meanIdentityPerception})
+                getEscapeAcc = lambda trajectory: int(len(trajectory) >= (maxRunningSteps - 2))
+                meanEscape = np.mean([getEscapeAcc(trajectory) for trajectory in trajectories])
+                meanEscapeOnConditions.update({chasingSubtlety: meanEscape})
             
             
-            #allResults.append(meanIdentityPerceptionOnConditions)
-            #results = pd.DataFrame(allResults)
-            #csvSavePath = getCSVSavePath({'measure': 'posterior'})
-            #results.to_csv(csvSavePath)
+            allResults.append(meanEscapeOnConditions)
+            results = pd.DataFrame(allResults)
+            escapeCSVSavePath = getCSVSavePath({'measure': 'escape'})
+            results.to_csv(escapeCSVSavePath)
             
             allPerceptionResults.append(meanPerceptionOnConditions)
             perceptionResults = pd.DataFrame(allPerceptionResults)
@@ -423,16 +425,16 @@ def main():
     manipulatedVariables = OrderedDict()
     manipulatedVariables['alphaForStateWidening'] = [0.25]
     #manipulatedVariables['attentionType'] = ['idealObserver', 'hybrid4']
-    manipulatedVariables['attentionType'] = ['hybrid4', 'preAttention']
+    #manipulatedVariables['attentionType'] = ['hybrid4', 'preAttention']
     #manipulatedVariables['attentionType'] = ['preAttention']
-    #manipulatedVariables['attentionType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
+    manipulatedVariables['attentionType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
     #manipulatedVariables['attentionType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5']
     manipulatedVariables['CForStateWidening'] = [2]
-    manipulatedVariables['minAttentionDistance'] = [40.0]
-    manipulatedVariables['rangeAttention'] = [10.1]
+    manipulatedVariables['minAttentionDistance'] = [10.0, 20.0, 40.0]
+    manipulatedVariables['rangeAttention'] = [8.1]
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [1, 2]
-    manipulatedVariables['numSimulationTimes'] = [1]
+    manipulatedVariables['numSimulationTimes'] = [72, 102]
     manipulatedVariables['actionRatio'] = [0.2]
     manipulatedVariables['burnTime'] = [0]
  

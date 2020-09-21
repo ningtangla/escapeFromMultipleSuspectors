@@ -312,7 +312,7 @@ def main():
     manipulatedVariables['actionRatio'] = [0.2]
     manipulatedVariables['burnTime'] = [0]
     manipulatedVariables['actionCost'] = [0.0, 0.01, 0.05, 0.1]
-    manipulatedVariables['damp'] = [0.0, 0.25]
+    manipulatedVariables['damp'] = [0.05, 0.15]
  
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
     parametersAllCondtion = [dict(list(specificValueParameter)) for specificValueParameter in productedValues]
