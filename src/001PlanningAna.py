@@ -171,7 +171,7 @@ class RunOneCondition:
                 checkBoundaryAndAdjust = ag.CheckBoundaryAndAdjust(xBoundary, yBoundary) 
                 transiteMultiAgentMotion = ag.TransiteMultiAgentMotion(checkBoundaryAndAdjust)
                
-                minDistance = 0.0 * distanceToVisualDegreeRatio
+                minDistance = 2.5 * distanceToVisualDegreeRatio
                 isTerminal = env.IsTerminal(sheepId, minDistance)
                # screen = pg.display.set_mode([xBoundary[1], yBoundary[1]])
                # screenColor = np.array([0, 0, 0])
@@ -343,7 +343,7 @@ class RunOneCondition:
                 tsl.saveToPickle(trajectories, savePath)
                 getCSVSavePath = self.getCSVSavePathByCondition(condition)
                 
-                startStatsIndex = 10
+                startStatsIndex = 1
                 def getTrueWolfIdSubtletyAcc(trajectory):
                     AccTrial = []
                     for timeStepIndex in range(len(trajectory)):
@@ -429,10 +429,10 @@ def main():
     #manipulatedVariables['attentionType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5']
     manipulatedVariables['CForStateWidening'] = [2]
     manipulatedVariables['minAttentionDistance'] = [40.0]
-    manipulatedVariables['rangeAttention'] = [10.0]
+    manipulatedVariables['rangeAttention'] = [10.1]
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [1, 2]
-    manipulatedVariables['numSimulationTimes'] = [71]
+    manipulatedVariables['numSimulationTimes'] = [72]
     manipulatedVariables['actionRatio'] = [0.2]
     manipulatedVariables['burnTime'] = [0]
  

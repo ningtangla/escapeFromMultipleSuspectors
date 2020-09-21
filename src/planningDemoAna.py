@@ -15,7 +15,7 @@ import pathos.multiprocessing as mp
 import pygame as pg
 from pygame.color import THECOLORS
 
-from drawDemo import DrawBackground, DrawCircleOutside, DrawState, ChaseTrialWithTraj, InterpolateState
+from drawDemo import DrawBackground, DrawCircleOutside, DrawState, ChaseTrialWithTraj, InterpolateState, DrawPlanningAna
 from trajectoriesSaveLoad import GetSavePath, readParametersFromDf, LoadTrajectories, SaveAllTrajectories, \
         GenerateAllSampleIndexSavePaths, saveToPickle, loadFromPickle
 from stochasticAgentsMotionSimulationByAccerelationActionBurnTime import CheckBoundaryAndAdjust, TransiteMultiAgentMotion
@@ -36,7 +36,7 @@ def main():
     CForStateWidening = 2
     cBase = 50
     numTrees = 2
-    numSimulationTimes = 72
+    numSimulationTimes = 71
     trajectoryFixedParameters = {'alphaForStateWidening': alphaForStateWidening, 'CForStateWidening': CForStateWidening,
             'cBase': cBase, 'numTrees': numTrees, 'numSimulationTimes': numSimulationTimes}
     trajectoryExtension = '.pickle'
@@ -45,13 +45,13 @@ def main():
     # Compute Statistics on the Trajectories
     loadTrajectories = LoadTrajectories(getTrajectorySavePath, loadFromPickle)
     minAttentionDistance = 40.0
-    rangeAttention = 4
+    rangeAttention = 10.0
     actionRatio = 0.2
-    burnTime = 4
+    burnTime = 0
     trajectoryParameters = {'minAttentionDistance': minAttentionDistance, 'rangeAttention': rangeAttention, 'actionRatio': actionRatio, 
             'burnTime': burnTime}
     chasingSubtlety = 500.0
-    subIndex = 0
+    subIndex = 1
     #attentionType = 'preAttention'
     attentionType = 'hybrid4'
     trajectoryParameters.update({'chasingSubtlety': chasingSubtlety, 'subIndex': subIndex, 'attentionType': attentionType})
@@ -75,7 +75,7 @@ def main():
     circleSize = 10
     positionIndex = [0, 1]
     agentIdsToDraw = list(range(numSheep + numWolves))
-    saveImage = True
+    saveImage = False
     imageSavePath = os.path.join(trajectoryDirectory, 'picMovingSheep')
     if not os.path.exists(imageSavePath):
         os.makedirs(imageSavePath)
@@ -93,6 +93,8 @@ def main():
     drawState = DrawState(FPS, screen, circleColorSpace, circleSize, agentIdsToDraw, positionIndex, 
             saveImage, saveImageDir, drawBackground, updateColorSpaceByPosterior, drawCircleOutside)
     
+    drawPlanningAna = DrawPlanningAna(FPS, screen, circleColorSpace, circleSize, agentIdsToDraw, positionIndex, 
+            saveImage, saveImageDir, drawBackground, updateColorSpaceByPosterior, drawCircleOutside)
    # MDP Env
     xBoundary = [0,640]
     yBoundary = [0,480]
@@ -104,7 +106,8 @@ def main():
     stateIndexInTimeStep = 0
     actionIndexInTimeStep = 1
     posteriorIndexInTimeStep = 4
-    chaseTrial = ChaseTrialWithTraj(stateIndexInTimeStep, drawState, interpolateState, actionIndexInTimeStep, posteriorIndexInTimeStep)
+    chaseTrial = ChaseTrialWithTraj(stateIndexInTimeStep, drawState, interpolateState, 
+            actionIndexInTimeStep, posteriorIndexInTimeStep, drawPlanningAna)
     
     print(len(trajectories))
     lens = [len(trajectory) for trajectory in trajectories]
