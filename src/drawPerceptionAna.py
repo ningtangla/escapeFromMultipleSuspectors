@@ -29,10 +29,10 @@ def main():
     manipulatedVariables['CForStateWidening'] = [2]
     #manipulatedVariables['minAttentionDistance'] = [8.5, 12.5]#[18.0, 40.0]
     manipulatedVariables['minAttentionDistance'] = [40.0]
-    manipulatedVariables['rangeAttention'] = [10.1]
+    manipulatedVariables['rangeAttention'] = [8.3]
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [1]
-    manipulatedVariables['numSimulationTimes'] = [1]
+    manipulatedVariables['numSimulationTimes'] = [72]
     manipulatedVariables['actionRatio'] = [0.2]
     manipulatedVariables['burnTime'] = [0]
  
@@ -90,6 +90,9 @@ def main():
         plotCounter = plotCounter + 1
 
     plt.suptitle('Measurement = Perception Rate')
+    #plt.suptitle('Measurement = Action Deviation')
+    #plt.suptitle('Measurement = Velocity Diff')
+    #plt.suptitle('Measurement = Escape rate')
     fig.text(x = 0.5, y = 0.92, s = 'Min Attention Distance', ha = 'center', va = 'center')
     fig.text(x = 0.05, y = 0.5, s = 'Attention Range', ha = 'center', va = 'center', rotation=90)
     plt.show()

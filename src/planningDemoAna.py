@@ -36,7 +36,7 @@ def main():
     CForStateWidening = 2
     cBase = 50
     numTrees = 1
-    numSimulationTimes = 1
+    numSimulationTimes = 72
     trajectoryFixedParameters = {'alphaForStateWidening': alphaForStateWidening, 'CForStateWidening': CForStateWidening,
             'cBase': cBase, 'numTrees': numTrees, 'numSimulationTimes': numSimulationTimes}
     trajectoryExtension = '.pickle'
@@ -45,7 +45,7 @@ def main():
     # Compute Statistics on the Trajectories
     loadTrajectories = LoadTrajectories(getTrajectorySavePath, loadFromPickle)
     minAttentionDistance = 40.0
-    rangeAttention = 10.1
+    rangeAttention = 8.1
     actionRatio = 0.2
     burnTime = 0
     trajectoryParameters = {'minAttentionDistance': minAttentionDistance, 'rangeAttention': rangeAttention, 'actionRatio': actionRatio, 
