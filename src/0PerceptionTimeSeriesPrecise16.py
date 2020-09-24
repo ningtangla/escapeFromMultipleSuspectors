@@ -181,25 +181,25 @@ class RunOneCondition:
                     memoryrateForUntracked=0.45
                 if attentionType == 'attention3':
                     attentionLimitation= 3
-                    precisionPerSlot=8.0
+                    precisionPerSlot=16.0
                     precisionForUntracked=0.01
                     memoryratePerSlot=0.7
                     memoryrateForUntracked=0.01
                 if attentionType == 'hybrid3':
                     attentionLimitation= 3
-                    precisionPerSlot=8.0
+                    precisionPerSlot=16.0
                     precisionForUntracked=2.5
                     memoryratePerSlot=0.7
                     memoryrateForUntracked=0.45
                 if attentionType == 'attention4':
                     attentionLimitation= 4
-                    precisionPerSlot=8.0
+                    precisionPerSlot=16.0
                     precisionForUntracked=0.01
                     memoryratePerSlot=0.7
                     memoryrateForUntracked=0.01
                 if attentionType == 'hybrid4':
                     attentionLimitation= 4
-                    precisionPerSlot=8.0
+                    precisionPerSlot=16.0
                     precisionForUntracked=2.5
                     memoryratePerSlot=0.7
                     memoryrateForUntracked=0.45
@@ -389,13 +389,13 @@ def drawPerformanceline(dataDf, axForDraw):
 
 def main():     
     manipulatedVariables = OrderedDict()
-    manipulatedVariables['alphaForStateWidening'] = [0.31]
+    manipulatedVariables['alphaForStateWidening'] = [0.316]
     #manipulatedVariables['attentionType'] = ['idealObserver', 'hybrid4']
     #manipulatedVariables['attentionType'] = ['hybrid4']
     #manipulatedVariables['attentionType'] = ['preAttention']
     manipulatedVariables['attentionType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
     #manipulatedVariables['attentionType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5']
-    manipulatedVariables['CForStateWidening'] = [2]
+    manipulatedVariables['CForStateWidening'] = [2.7]
     manipulatedVariables['minAttentionDistance'] = [5.0, 10.0, 20.0, 40.0]
     manipulatedVariables['rangeAttention'] = [5.0, 10.0, 20.0, 40.0]
     manipulatedVariables['cBase'] = [50]
