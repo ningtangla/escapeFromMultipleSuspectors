@@ -26,7 +26,7 @@ def main():
     manipulatedVariables['attentionType'] = ['preAttention', 'attention4', 'hybrid4', 'idealObserver']#, 'attention3', 'hybrid3']
     manipulatedVariables['CForStateWidening'] = [2]
     #manipulatedVariables['minAttentionDistance'] = [8.5, 12.5]#[18.0, 40.0]
-    manipulatedVariables['minAttentionDistance'] = [18.0, 40.0]
+    manipulatedVariables['minAttentionDistance'] = [20.0, 40.0]
     manipulatedVariables['rangeAttention'] = [4]
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [2]

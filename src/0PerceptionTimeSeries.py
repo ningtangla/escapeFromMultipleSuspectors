@@ -68,7 +68,10 @@ class RunMCTSTrjactory:
             posteriorOnHypothesisAttention = probabilityOnHypothesisAttention/probabilityOnHypothesisAttention.sum()
             probabilityOnAttentionSlotByGroupbySum = posteriorOnHypothesisAttention.groupby(['wolfIdentity','sheepIdentity']).sum().values
             posterior = probabilityOnAttentionSlotByGroupbySum/np.sum(probabilityOnAttentionSlotByGroupbySum)
-            stateToRecord = [physicalState, posterior]
+            attentionStatusOnJointSpace = hypothesisInformation['attentionStatus']
+            attentionStatus = attentionStatusOnJointSpace.groupby(['wolfIdentity', 'sheepIdentity']).mean().values
+            
+            stateToRecord = [physicalState, posterior, attentionStatus]
             trajectory.append([stateToRecord, action]) 
             nextState = self.transitionFunctionInPlay(currState, action)
             #print('***', physicalState[0][0], action)
@@ -84,6 +87,7 @@ class RunOneCondition:
     def __call__(self, condition):
         
         getSavePath = self.getTrajectorySavePathByCondition(condition)
+        getCSVSavePath = self.getCSVSavePathByCondition(condition)
         attentionType = condition['attentionType']
         alpha = condition['alphaForStateWidening']
         C = condition['CForStateWidening']
@@ -95,11 +99,13 @@ class RunOneCondition:
         cBase = condition['cBase']
         burnTime = condition['burnTime']
 
-        numSub = 2
-        allResults = []
-        possibleTrialSubtleties = [500, 3.3, 0.92]
+        numSub = 5
+        allResultsIdentity = []
+        allResultsAttention = []
+        possibleTrialSubtleties = [500.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001]
         for subIndex in range(numSub):
             meanIdentityPerceptionOnConditions = {}
+            meanAttentionPerceptionOnConditions = {}
             for chasingSubtlety in possibleTrialSubtleties: 
 
                 print(numTree, chasingSubtlety, numSimulations, attentionType)
@@ -160,13 +166,13 @@ class RunOneCondition:
                 transiteStateWithoutActionChangeInPlay = env.TransiteStateWithoutActionChange(numFrameWithoutActionChange, isTerminal, transiteMultiAgentMotion, render, renderOnInPlay)     
                
                 if attentionType == 'idealObserver':
-                    attentionLimitation= 1
+                    attentionLimitation= 4
                     precisionPerSlot=500.0
                     precisionForUntracked=500.0
                     memoryratePerSlot=1.0
                     memoryrateForUntracked=1.0
                 if attentionType == 'preAttention':
-                    attentionLimitation= 1
+                    attentionLimitation= 4
                     precisionPerSlot=2.5
                     precisionForUntracked=2.5
                     memoryratePerSlot=0.45
@@ -198,25 +204,25 @@ class RunOneCondition:
                 
                 
                 if attentionType == 'preAttentionMem0.25':
-                    attentionLimitation= 1
+                    attentionLimitation= 4
                     precisionPerSlot=2.5
                     precisionForUntracked=2.5
                     memoryratePerSlot=0.25
                     memoryrateForUntracked=0.25
                 if attentionType == 'preAttentionMem0.65':
-                    attentionLimitation= 1
+                    attentionLimitation= 4
                     precisionPerSlot=2.5
                     precisionForUntracked=2.5
                     memoryratePerSlot=0.65
                     memoryrateForUntracked=0.65
                 if attentionType == 'preAttentionPre0.5':
-                    attentionLimitation= 1
+                    attentionLimitation= 4
                     precisionPerSlot=0.5
                     precisionForUntracked=0.5
                     memoryratePerSlot=0.45
                     memoryrateForUntracked=0.45
                 if attentionType == 'preAttentionPre4.5':
-                    attentionLimitation= 1
+                    attentionLimitation= 4
                     precisionPerSlot=4.5
                     precisionForUntracked=4.5
                     memoryratePerSlot=0.45
@@ -303,7 +309,7 @@ class RunOneCondition:
                 #mcts = MCTS(numSimulations, selectChild, expand, rollout, backup, selectAction, mctsRender, mctsRenderOn)
                 pwMultipleTrees = PWMultipleTrees(numSimulations, selectAction, selectNextState, expand, expandNewState, estimateValue, backup, outputAction)
                 
-                maxRunningSteps = int(25 * numMDPTimeStepPerSecond)
+                maxRunningSteps = int(50 * numMDPTimeStepPerSecond)
                 makeDiffSimulationRoot = MakeDiffSimulationRoot(isTerminal, updatePhysicalStateByBeliefInSimulationRoot)
                 runMCTSTrjactory = RunMCTSTrjactory(maxRunningSteps, numTree, numActionPlaned, sheepActionUpdateFrequency, transitionFunctionInPlay, isTerminal, makeDiffSimulationRoot, render)
 
@@ -325,15 +331,38 @@ class RunOneCondition:
                 #    meanIdentityAcc = np.mean(AccTrial)
                 #    #meanIdentityAcc = np.mean(np.array([timeStep[0][1][int(timeStep[0][0][3][0] - 1)] for timeStep in trajectory])[11:])
                 #    return meanIdentityAcc
-                getTrueWolfIndentityAcc = lambda trajectory: np.mean(np.array([timeStep[0][1][int(timeStep[0][0][3][0] - 1)] for timeStep in trajectory])[2:-1])
+                getTrueWolfIndentityAcc = lambda trajectory: np.array([timeStep[0][1][int(timeStep[0][0][3][0] - 1)] for timeStep in trajectory])[:]
+                identityPerceptionTimeSeries = np.mean([getTrueWolfIndentityAcc(trajectory) for trajectory in trajectories], axis = 0)
+                resultsTimeSeries = pd.DataFrame([identityPerceptionTimeSeries], columns = list(range(len(identityPerceptionTimeSeries))))
+                savePathIdentitySeries = getCSVSavePath({'chasingSubtlety': chasingSubtlety, 'measure': 'identity'})
+                if subIndex == 0:
+                    resultsTimeSeries.to_csv(savePathIdentitySeries, mode='a')
+                else:
+                    resultsTimeSeries.to_csv(savePathIdentitySeries, mode='a', header=False)
                 meanIdentityPerception = np.mean([getTrueWolfIndentityAcc(trajectory) for trajectory in trajectories])
                 meanIdentityPerceptionOnConditions.update({chasingSubtlety: meanIdentityPerception})
                 print(meanIdentityPerceptionOnConditions)
-            allResults.append(meanIdentityPerceptionOnConditions)
-            results = pd.DataFrame(allResults)
-            getCSVSavePath = self.getCSVSavePathByCondition(condition)
-            csvSavePath = getCSVSavePath({})
-            results.to_csv(csvSavePath)
+                
+                getTrueWolfAttentionNumber = lambda trajectory: np.array([timeStep[0][2][int(timeStep[0][0][3][0] - 1)] for timeStep in trajectory])[:]
+                attentionNumberTimeSeries = np.mean([getTrueWolfAttentionNumber(trajectory) for trajectory in trajectories], axis = 0)
+                resultsAttentionTimeSeries = pd.DataFrame([attentionNumberTimeSeries], columns = list(range(len(attentionNumberTimeSeries))))
+                savePathAttentionSeries = getCSVSavePath({'chasingSubtlety': chasingSubtlety, 'measure': 'attentionNumber'})
+                if subIndex == 0:
+                    resultsAttentionTimeSeries.to_csv(savePathAttentionSeries, mode='a')
+                else:
+                    resultsAttentionTimeSeries.to_csv(savePathAttentionSeries, mode='a', header=False)
+                meanAttentionPerception = np.mean([getTrueWolfAttentionNumber(trajectory) for trajectory in trajectories])
+                meanAttentionPerceptionOnConditions.update({chasingSubtlety: meanAttentionPerception})
+            
+            allResultsIdentity.append(meanIdentityPerceptionOnConditions)
+            resultsIdentity = pd.DataFrame([allResultsIdentity])
+            csvSavePathIdentity = getCSVSavePath({'measure': 'identity'})
+            resultsIdentity.to_csv(csvSavePathIdentity)
+            
+            allResultsAttention.append(meanAttentionPerceptionOnConditions)
+            resultsAttention = pd.DataFrame(allResultsAttention)
+            csvSavePathAttention = getCSVSavePath({'measure': 'attentionNumber'})
+            resultsAttention.to_csv(csvSavePathAttention)
 
 def drawPerformanceline(dataDf, axForDraw):
     plotDf = dataDf.reset_index() 
@@ -348,13 +377,13 @@ def main():
     manipulatedVariables['attentionType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
     #manipulatedVariables['attentionType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5']
     manipulatedVariables['CForStateWidening'] = [2]
-    manipulatedVariables['minAttentionDistance'] = [10.0]
-    manipulatedVariables['rangeAttention'] = [5.0]
+    manipulatedVariables['minAttentionDistance'] = [5.0, 10.0, 20.0, 40.0]
+    manipulatedVariables['rangeAttention'] = [5.0, 10.0, 20.0, 40.0]
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [1]
     manipulatedVariables['numSimulationTimes'] = [1]
     manipulatedVariables['actionRatio'] = [0.2]
-    manipulatedVariables['burnTime'] = [1]
+    manipulatedVariables['burnTime'] = [0]
  
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
     parametersAllCondtion = [dict(list(specificValueParameter)) for specificValueParameter in productedValues]

@@ -27,13 +27,13 @@ def main():
     #manipulatedVariables['attentionType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5', 'preAttention']
     manipulatedVariables['CForStateWidening'] = [2]
     #manipulatedVariables['minAttentionDistance'] = [8.5, 12.5]#[18.0, 40.0]
-    manipulatedVariables['minAttentionDistance'] = [40.0]
-    manipulatedVariables['rangeAttention'] = [4]
+    manipulatedVariables['minAttentionDistance'] = [10.0, 20.0, 40.0]
+    manipulatedVariables['rangeAttention'] = [5.0]
     manipulatedVariables['cBase'] = [50]
-    manipulatedVariables['numTrees'] = [2]
+    manipulatedVariables['numTrees'] = [1]
     manipulatedVariables['numSimulationTimes'] = [1]
     manipulatedVariables['actionRatio'] = [0.2]
-    manipulatedVariables['burnTime'] = [0]
+    manipulatedVariables['burnTime'] = [1]
  
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
     parametersAllCondtion = [dict(list(specificValueParameter)) for specificValueParameter in productedValues]
@@ -46,7 +46,8 @@ def main():
 
     measurementEscapeExtension = '.csv'
     getCSVSavePathByCondition = lambda condition: tsl.GetSavePath(trajectoryDirectory, measurementEscapeExtension, condition)
-    columnNames = [500.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001]
+    #columnNames = [500.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001]
+    columnNames = [500.0, 3.3, 0.92]
     readcsv = Readcsv(getCSVSavePathByCondition, columnNames)
 
     precisionToSubtletyDict={500.0:0, 50.0:5, 11.0:30, 3.3:60, 1.83:90, 0.92:120, 0.31:150, 0.001: 180}

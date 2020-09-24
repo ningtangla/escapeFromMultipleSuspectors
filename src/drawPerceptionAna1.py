@@ -20,7 +20,7 @@ class Readcsv:
 
 def main():     
     manipulatedVariables = OrderedDict()
-    manipulatedVariables['alphaForStateWidening'] = [0.25]
+    manipulatedVariables['alphaForStateWidening'] = [0.75]
     manipulatedVariables['attentionType'] = ['idealObserver', 'hybrid4']
     #manipulatedVariables['attentionType'] = ['hybrid4', 'preAttention']
     #manipulatedVariables['attentionType'] = ['preAttention', 'attention4', 'hybrid4', 'idealObserver']#, 'attention3', 'hybrid3']
@@ -59,18 +59,18 @@ def main():
     toSplitFrame = pd.DataFrame(index = modelIndex)
 
     modelResultDf = toSplitFrame.groupby(levelNames).apply(readcsv)
-    toDropLevels = ['alphaForStateWidening', 'CForStateWidening', 'cBase', 'numTrees', 'numSimulationTimes', 'actionRatio', 'burnTime', 'measure']
+    toDropLevels = ['alphaForStateWidening', 'CForStateWidening', 'cBase', 'numTrees', 'rangeAttention', 'actionRatio', 'burnTime', 'measure']
     modelResultDf.index = modelResultDf.index.droplevel(toDropLevels)
     fig = plt.figure()
     numColumns = len(manipulatedVariables['minAttentionDistance'])
-    numRows = len(manipulatedVariables['rangeAttention'])
+    numRows = len(manipulatedVariables['numSimulationTimes'])
     plotCounter = 1
-    for key, group in modelResultDf.groupby(['rangeAttention', 'minAttentionDistance']):
+    for key, group in modelResultDf.groupby(['numSimulationTimes', 'minAttentionDistance']):
         columnNamesAsSubtlety = [precisionToSubtletyDict[precision] for precision in group.columns]
         group.columns = columnNamesAsSubtlety
         group = group.stack()
-        group.index.names = ['attentionType', 'minAttentionDistance', 'rangeAttention', 'chasingSubtlety']
-        group.index = group.index.droplevel(['minAttentionDistance', 'rangeAttention'])
+        group.index.names = ['attentionType', 'minAttentionDistance', 'numSimulationTimes', 'chasingSubtlety']
+        group.index = group.index.droplevel(['minAttentionDistance', 'numSimulationTimes'])
         group = group.to_frame()
         
         group.columns = ['model']
@@ -95,7 +95,8 @@ def main():
     #plt.suptitle('Measurement = Velocity Diff')
     plt.suptitle('Measurement = Escape rate')
     fig.text(x = 0.5, y = 0.92, s = 'Min Attention Distance', ha = 'center', va = 'center')
-    fig.text(x = 0.05, y = 0.5, s = 'Attention Range', ha = 'center', va = 'center', rotation=90)
+    #fig.text(x = 0.05, y = 0.5, s = 'Attention Range', ha = 'center', va = 'center', rotation=90)
+    fig.text(x = 0.05, y = 0.5, s = 'Number of Simulations', ha = 'center', va = 'center', rotation=90)
     plt.show()
 
 if __name__ == "__main__":
