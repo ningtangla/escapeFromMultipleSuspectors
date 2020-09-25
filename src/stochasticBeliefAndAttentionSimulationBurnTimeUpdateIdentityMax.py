@@ -107,8 +107,10 @@ class UpdateBeliefAndAttentionState():
         return newBeliefAndAttention
 
 class UpdatePhysicalStateImagedByBelief():
-    def __init__(self, updateFrequency):
+    def __init__(self, updateFrequency, softParaForIdentiy, softParaForSubtlety):
         self.updateFrequency = updateFrequency
+        self.softParaForIdentiy = softParaForIdentiy
+        self.softParaForSubtlety = softParaForSubtlety
     def __call__(self, state):
         physicalState, beliefAndAttention = state 
         agentStates, agentActions, timeStep, wolfIdAndSubtlety = physicalState

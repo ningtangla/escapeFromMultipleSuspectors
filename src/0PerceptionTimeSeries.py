@@ -10,7 +10,9 @@ import pathos.multiprocessing as mp
 from anytree import AnyNode as Node
 from anytree import RenderTree
 from collections import OrderedDict
+import warnings
 
+#warnings.simplefilter("error")
 # Local import
 from algorithms.stochasticPW import ScoreChild, SelectAction, SelectNextState, InitializeChildren, Expand, ExpandNextState, \
         PWidening, RollOut, backup, OutputAction, PWMultipleTrees
@@ -20,7 +22,7 @@ from visualize import draw
 import stochasticAgentsMotionSimulationByAccerelationActionBurnTime as ag
 import Attention
 import calPosterior
-import stochasticBeliefAndAttentionSimulationBurnTimeUpdateIdentityMax as ba
+import stochasticBeliefAndAttentionSimulationBurnTimeUpdateIdentitySampleAttention as ba
 import env
 import reward
 import trajectoriesSaveLoad as tsl
@@ -168,13 +170,13 @@ class RunOneCondition:
                 transiteStateWithoutActionChangeInPlay = env.TransiteStateWithoutActionChange(numFrameWithoutActionChange, isTerminal, transiteMultiAgentMotion, render, renderOnInPlay)     
                
                 if attentionType == 'idealObserver':
-                    attentionLimitation= 4
+                    attentionLimitation= 1
                     precisionPerSlot=500.0
                     precisionForUntracked=500.0
                     memoryratePerSlot=1.0
                     memoryrateForUntracked=1.0
                 if attentionType == 'preAttention':
-                    attentionLimitation= 4
+                    attentionLimitation= 1
                     precisionPerSlot=2.5
                     precisionForUntracked=2.5
                     memoryratePerSlot=0.45
@@ -256,12 +258,17 @@ class RunOneCondition:
                         attentionSwitchFrequencyInPlay, beliefUpdateFrequencyInPlay, burnTime)
 
                 updatePhysicalStateByBeliefFrequencyInSimulationRoot = int(0.2 * numMDPTimeStepPerSecond)
-                updatePhysicalStateByBeliefInSimulationRoot = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInSimulationRoot)
+                softParaForIdentity = 1
+                softParaForSubtlety = 1
+                updatePhysicalStateByBeliefInSimulationRoot = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInSimulationRoot,
+                        softParaForIdentity, softParaForSubtlety)
                 updatePhysicalStateByBeliefFrequencyInSimulation = np.inf
-                updatePhysicalStateByBeliefInSimulation = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInSimulation)
+                updatePhysicalStateByBeliefInSimulation = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInSimulation,
+                        softParaForIdentity, softParaForSubtlety)
                 
                 updatePhysicalStateByBeliefFrequencyInPlay = np.inf
-                updatePhysicalStateByBeliefInPlay = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInPlay)
+                updatePhysicalStateByBeliefInPlay = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInPlay,
+                        softParaForIdentity, softParaForSubtlety)
 
                 transitionFunctionInSimulation = env.TransitionFunction(resetPhysicalState, resetBeliefAndAttention, updatePhysicalState, transiteStateWithoutActionChangeInSimulation, 
                         updateBeliefAndAttentionInSimulation, updatePhysicalStateByBeliefInSimulation)
@@ -316,7 +323,7 @@ class RunOneCondition:
                 runMCTSTrjactory = RunMCTSTrjactory(maxRunningSteps, numTree, numActionPlaned, sheepActionUpdateFrequency, transitionFunctionInPlay, isTerminal, makeDiffSimulationRoot, render)
 
                 rootAction = actionSpace[np.random.choice(range(numActionSpace))]
-                numTrial = 50
+                numTrial = 2
                 trajectories = [runMCTSTrjactory(pwMultipleTrees) for trial in range(numTrial)]
                
                 savePath = getSavePath({'chasingSubtlety': chasingSubtlety, 'subIndex': subIndex})
@@ -398,7 +405,7 @@ def main():
     manipulatedVariables['CForStateWidening'] = [2]
     manipulatedVariables['minAttentionDistance'] = [5.0, 10.0, 20.0, 40.0]
     manipulatedVariables['rangeAttention'] = [5.0, 10.0, 20.0, 40.0]
-    manipulatedVariables['cBase'] = [38]
+    manipulatedVariables['cBase'] = [3]
     manipulatedVariables['numTrees'] = [1]
     manipulatedVariables['numSimulationTimes'] = [1]
     manipulatedVariables['actionRatio'] = [0.2]
@@ -419,11 +426,11 @@ def main():
     getCSVSavePathByCondition = lambda condition: tsl.GetSavePath(trajectoryDirectory, measurementEscapeExtension, condition)
     runOneCondition = RunOneCondition(getTrajectorySavePathByCondition, getCSVSavePathByCondition)
 
-    #runOneCondition(parametersAllCondtion[0])
+    runOneCondition(parametersAllCondtion[0])
     numCpuCores = os.cpu_count()
     numCpuToUse = int(numCpuCores)
     runPool = mp.Pool(numCpuToUse)
-    runPool.map(runOneCondition, parametersAllCondtion)
+    #runPool.map(runOneCondition, parametersAllCondtion)
    
     precisionToSubtletyDict={500:0,50:5,11:30,3.3:60,1.83:90,0.92:120,0.31:150,0.001: 180}
     

@@ -21,7 +21,7 @@ from visualize import draw
 import stochasticAgentsMotionSimulationByAccerelationActionBurnTime as ag
 import Attention
 import calPosterior as calPosterior
-import stochasticBeliefAndAttentionSimulationBurnTime as ba
+import stochasticBeliefAndAttentionSimulationBurnTimeUpdateIdentitySamplePosterior as ba
 import env
 import reward
 import trajectoriesSaveLoad as tsl

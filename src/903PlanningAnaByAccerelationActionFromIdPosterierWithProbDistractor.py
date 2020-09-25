@@ -18,11 +18,11 @@ from algorithms.stochasticPW import ScoreChild, SelectAction, SelectNextState, I
 
 from simple1DEnv import TransitionFunction, RewardFunction, Terminal
 from visualize import draw
-import stochasticAgentsMotionSimulationByAccerelationActionBurnTime as ag
+import stochasticAgentsMotionSimulationByAccerelationActionBurnTimeWithProbabilityDistractor as ag
 import Attention
 import calPosterior as calPosterior
-import stochasticBeliefAndAttentionSimulationBurnTime as ba
-import env
+import stochasticBeliefAndAttentionSimulationBurnTimeUpdateIdentitySampleAttention as ba
+import envWithProbabilityDistractor as env
 import reward
 import trajectoriesSaveLoad as tsl
 import AnalyticGeometryFunctions as agf

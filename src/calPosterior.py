@@ -4,6 +4,7 @@ import scipy.stats as stats
 import math
 
 def calAngleLikelihoodLogModifiedForPiRange(angle, kappa):
+    #print(stats.vonmises.logpdf(angle, kappa) + np.log(2))
     return stats.vonmises.logpdf(angle, kappa) + np.log(2)
 
 class CalPosteriorLog():

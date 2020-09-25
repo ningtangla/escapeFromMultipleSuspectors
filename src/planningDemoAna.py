@@ -36,7 +36,7 @@ def main():
     CForStateWidening = 2
     cBase = 50
     numTrees = 1
-    numSimulationTimes = 72
+    numSimulationTimes = 1
     trajectoryFixedParameters = {'alphaForStateWidening': alphaForStateWidening, 'CForStateWidening': CForStateWidening,
             'cBase': cBase, 'numTrees': numTrees, 'numSimulationTimes': numSimulationTimes}
     trajectoryExtension = '.pickle'
@@ -44,15 +44,18 @@ def main():
 
     # Compute Statistics on the Trajectories
     loadTrajectories = LoadTrajectories(getTrajectorySavePath, loadFromPickle)
-    minAttentionDistance = 40.0
-    rangeAttention = 8.1
+    minAttentionDistance = 10.0
+    rangeAttention = 10.0
     actionRatio = 0.2
     burnTime = 0
+    softId = 3
+    softSubtlety = 9
     trajectoryParameters = {'minAttentionDistance': minAttentionDistance, 'rangeAttention': rangeAttention, 'actionRatio': actionRatio, 
-            'burnTime': burnTime}
+            'burnTime': burnTime, 'softId': softId, 'softSubtlety': softSubtlety}
     chasingSubtlety = 500.0
     subIndex = 0
-    attentionType = 'preAttention'
+    attentionType = 'idealObserver'
+    #attentionType = 'preAttention'
     #attentionType = 'hybrid4'
     trajectoryParameters.update({'chasingSubtlety': chasingSubtlety, 'subIndex': subIndex, 'attentionType': attentionType})
 
@@ -68,7 +71,7 @@ def main():
     lineWidth = 4
     drawBackground = DrawBackground(screen, screenColor, xBoundary, yBoundary, lineColor, lineWidth)
     
-    FPS = 20
+    FPS = 2
     numSheep = 1
     numWolves = 24
     circleColorSpace = [[0, 255, 0]] * numSheep + [[255, 255, 255]] * numWolves

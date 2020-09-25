@@ -107,29 +107,34 @@ class UpdateBeliefAndAttentionState():
         return newBeliefAndAttention
 
 class UpdatePhysicalStateImagedByBelief():
-    def __init__(self, updateFrequency):
+    def __init__(self, updateFrequency, softParaForIdentiy, softParaForSubtlety):
         self.updateFrequency = updateFrequency
+        self.softParaForIdentiy = softParaForIdentiy
+        self.softParaForSubtlety = softParaForSubtlety
     def __call__(self, state):
         physicalState, beliefAndAttention = state 
         agentStates, agentActions, timeStep, wolfIdAndSubtlety = physicalState
         if timeStep % self.updateFrequency == 0:
 
             hypothesisInformation, positionOldTimeDF = beliefAndAttention
-            probabilityOnHypothesisIdentity = np.exp(hypothesisInformation['logP'])
-            #posteriorOnHypothesisAttention = probabilityOnHypothesisAttention/probabilityOnHypothesisAttention.sum()
-            probabilityOnIdentitySlotByGroupbySum = probabilityOnHypothesisIdentity.groupby(['wolfIdentity','sheepIdentity']).sum().values
-            posteriorOnIdentitySlot = probabilityOnIdentitySlotByGroupbySum/np.sum(probabilityOnIdentitySlotByGroupbySum)
-            
-            #posteriorAllHypothesesBeforeNormalization = np.exp(hypothesisInformation['logP'])
-            #posteriorAllHypotheses = posteriorAllHypothesesBeforeNormalization / (np.sum(posteriorAllHypothesesBeforeNormalization))
-            #print(posteriorAllHypotheses.values)#, np.sum(posteriorAllHypotheses))
-            #sampledHypothesisIndex = list(np.random.multinomial(1, posteriorOnIdentitySlot)).index(1)
-            #beliefWolfId, beliefSheepId, beliefWolfSubtlety = hypothesisInformation.index[sampledHypothesisIndex]
-            
+            attentedHypothesis = hypothesisInformation['attentionStatus']
+            attentedIdentity = attentedHypothesis.groupby(['wolfIdentity', 'sheepIdentity']).mean() 
+            posteriorOnIdentitySlot = attentedIdentity.values / np.sum(attentedIdentity.values)
+            softenPosteriorIdentityUnormalized = [np.power(prob, self.softParaForIdentiy) for prob in posteriorOnIdentitySlot]
+            softenPosteriorIdentity = np.array(softenPosteriorIdentityUnormalized) / np.sum(softenPosteriorIdentityUnormalized)
+
+            sampledHypothesisIndex = list(np.random.multinomial(1, softenPosteriorIdentity)).index(1)
+            beliefWolfId, beliefSheepId = attentedIdentity.index[sampledHypothesisIndex]
             #maxIndex = np.argwhere(posteriorOnIdentitySlot == np.max(posteriorOnIdentitySlot)).flatten()
             #beliefWolfId = np.random.choice(maxIndex) + 1
-            beliefWolfId = list(np.random.multinomial(1, posteriorOnIdentitySlot)).index(1) + 1
-            beliefWolfSubtlety = np.random.choice([500.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001])
+            beliefWolfId = list(np.random.multinomial(1, softenPosteriorIdentity)).index(1) + 1
+            
+            originSubtletyProbs = np.exp(hypothesisInformation[hypothesisInformation.index.get_level_values('wolfIdentity') == beliefWolfId]['logP'].values)
+            posteriorOnSubtlety = originSubtletyProbs / np.sum(originSubtletyProbs) 
+            softenPosteriorSubtletyUnormalized = [np.power(prob, self.softParaForSubtlety) for prob in posteriorOnSubtlety]
+            softenPosteriorSubtlety = np.array(softenPosteriorSubtletyUnormalized) / np.sum(softenPosteriorSubtletyUnormalized)
+            beliefWolfSubtlety = np.random.choice([500.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001], p = softenPosteriorSubtlety)
+            
             wolfIdAndSubtlety = [int(beliefWolfId), beliefWolfSubtlety]
             updatedPhysicalState = [agentStates, agentActions, timeStep, wolfIdAndSubtlety]
             state = [updatedPhysicalState, beliefAndAttention]
