@@ -99,11 +99,11 @@ class RunOneCondition:
         cBase = condition['cBase']
         burnTime = condition['burnTime']
 
-        numSub = 5
+        numSub = 1
         allResultsIdentity = []
         allResultsAttention = []
         allResultsIdentitySampled = []
-        possibleTrialSubtleties = [500.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001]
+        possibleTrialSubtleties = [11.0, 3.3, 1.83]#[500.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001]
         for subIndex in range(numSub):
             meanIdentityPerceptionOnConditions = {}
             meanAttentionPerceptionOnConditions = {}
@@ -311,12 +311,12 @@ class RunOneCondition:
                 #mcts = MCTS(numSimulations, selectChild, expand, rollout, backup, selectAction, mctsRender, mctsRenderOn)
                 pwMultipleTrees = PWMultipleTrees(numSimulations, selectAction, selectNextState, expand, expandNewState, estimateValue, backup, outputAction)
                 
-                maxRunningSteps = int(50 * numMDPTimeStepPerSecond)
+                maxRunningSteps = int(25 * numMDPTimeStepPerSecond)
                 makeDiffSimulationRoot = MakeDiffSimulationRoot(isTerminal, updatePhysicalStateByBeliefInSimulationRoot)
                 runMCTSTrjactory = RunMCTSTrjactory(maxRunningSteps, numTree, numActionPlaned, sheepActionUpdateFrequency, transitionFunctionInPlay, isTerminal, makeDiffSimulationRoot, render)
 
                 rootAction = actionSpace[np.random.choice(range(numActionSpace))]
-                numTrial = 10
+                numTrial = 50
                 trajectories = [runMCTSTrjactory(pwMultipleTrees) for trial in range(numTrial)]
                
                 savePath = getSavePath({'chasingSubtlety': chasingSubtlety, 'subIndex': subIndex})
@@ -356,7 +356,7 @@ class RunOneCondition:
                 meanAttentionPerception = np.mean([getTrueWolfAttentionNumber(trajectory) for trajectory in trajectories])
                 meanAttentionPerceptionOnConditions.update({chasingSubtlety: meanAttentionPerception})
             
-                getSampledWolfIndentityAcc = lambda trajectory: np.array([int(int(timeStep[0][3][0][0]) == int(timeStep[0][0][3][0] - 1)) 
+                getSampledWolfIndentityAcc = lambda trajectory: np.array([int(int(timeStep[0][3][0][0]) == int(timeStep[0][0][3][0])) 
                     for timeStep in trajectory])[:]
                 identitySampledTimeSeries = np.mean([getSampledWolfIndentityAcc(trajectory) for trajectory in trajectories], axis = 0)
                 resultsSampledTimeSeries = pd.DataFrame([identitySampledTimeSeries], columns = list(range(len(identitySampledTimeSeries))))
@@ -389,7 +389,7 @@ def drawPerformanceline(dataDf, axForDraw):
 
 def main():     
     manipulatedVariables = OrderedDict()
-    manipulatedVariables['alphaForStateWidening'] = [0.31]
+    manipulatedVariables['alphaForStateWidening'] = [0.25]
     #manipulatedVariables['attentionType'] = ['idealObserver', 'hybrid4']
     #manipulatedVariables['attentionType'] = ['hybrid4']
     #manipulatedVariables['attentionType'] = ['preAttention']
@@ -398,7 +398,7 @@ def main():
     manipulatedVariables['CForStateWidening'] = [2]
     manipulatedVariables['minAttentionDistance'] = [5.0, 10.0, 20.0, 40.0]
     manipulatedVariables['rangeAttention'] = [5.0, 10.0, 20.0, 40.0]
-    manipulatedVariables['cBase'] = [50]
+    manipulatedVariables['cBase'] = [38]
     manipulatedVariables['numTrees'] = [1]
     manipulatedVariables['numSimulationTimes'] = [1]
     manipulatedVariables['actionRatio'] = [0.2]

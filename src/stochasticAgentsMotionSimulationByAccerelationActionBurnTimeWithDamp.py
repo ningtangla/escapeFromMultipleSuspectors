@@ -60,7 +60,9 @@ class ResetPhysicalState():
         wolfId, subtlety = startWolfIdAndSubtlety
         distractorsIds = [id for id in range(self.numAgent) if id not in [self.sheepId, wolfId]]  
         startAgentPositions = np.array(self.resetAgentPositions(wolfId, distractorsIds))
-        startAgentVelocities = np.array([[0, 0] for agentId in range(self.numAgent)])
+        #startAgentVelocities = np.array([[0, 0] for agentId in range(self.numAgent)])
+        startAgentVelocities = np.array([ag.transitePolarToCartesian(np.random.uniform(-math.pi, math.pi)) for agentId in range(self.numAgent)])
+        startAgentVelocities[0] = np.array([0, 0])
         startTimeStep = np.array([0])
         startPhysicalState = [startAgentPositions, startAgentVelocities, startTimeStep, startWolfIdAndSubtlety]
         return startPhysicalState

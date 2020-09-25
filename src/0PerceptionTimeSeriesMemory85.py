@@ -356,7 +356,7 @@ class RunOneCondition:
                 meanAttentionPerception = np.mean([getTrueWolfAttentionNumber(trajectory) for trajectory in trajectories])
                 meanAttentionPerceptionOnConditions.update({chasingSubtlety: meanAttentionPerception})
             
-                getSampledWolfIndentityAcc = lambda trajectory: np.array([int(int(timeStep[0][3][0][0]) == int(timeStep[0][0][3][0] - 1)) 
+                getSampledWolfIndentityAcc = lambda trajectory: np.array([int(int(timeStep[0][3][0][0]) == int(timeStep[0][0][3][0])) 
                     for timeStep in trajectory])[:]
                 identitySampledTimeSeries = np.mean([getSampledWolfIndentityAcc(trajectory) for trajectory in trajectories], axis = 0)
                 resultsSampledTimeSeries = pd.DataFrame([identitySampledTimeSeries], columns = list(range(len(identitySampledTimeSeries))))

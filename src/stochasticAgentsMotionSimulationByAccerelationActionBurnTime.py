@@ -60,7 +60,9 @@ class ResetPhysicalState():
         wolfId, subtlety = startWolfIdAndSubtlety
         distractorsIds = [id for id in range(self.numAgent) if id not in [self.sheepId, wolfId]]  
         startAgentPositions = np.array(self.resetAgentPositions(wolfId, distractorsIds))
-        startAgentVelocities = np.array([[0, 0] for agentId in range(self.numAgent)])
+        #startAgentVelocities = np.array([[0, 0] for agentId in range(self.numAgent)])
+        startAgentVelocities = np.array([ag.transitePolarToCartesian(np.random.uniform(-math.pi, math.pi)) for agentId in range(self.numAgent)])
+        startAgentVelocities[0] = np.array([0, 0])
         startTimeStep = np.array([0])
         startPhysicalState = [startAgentPositions, startAgentVelocities, startTimeStep, startWolfIdAndSubtlety]
         return startPhysicalState
@@ -117,7 +119,6 @@ class DistractorPolicy():
             oldDistractorDirectionPolar = ag.transiteCartesianToPolar(oldDistractorVel)
             distractorDirectionPolar = np.random.uniform(-math.pi*1/3, math.pi*1/3) + oldDistractorDirectionPolar 
             distractorDirection = ag.transitePolarToCartesian(distractorDirectionPolar)
-            
             warmUpRate = min(1, timeStep/self.warmUpTimeSteps)
             distractorSpeed = self.minDistractorSpeed + (self.maxDistractorSpeed - self.minDistractorSpeed) * warmUpRate
             distractorVel = distractorSpeed * distractorDirection

@@ -22,18 +22,18 @@ def main():
     manipulatedVariables = OrderedDict()
     manipulatedVariables['alphaForStateWidening'] = [0.25]
     #manipulatedVariables['attentionType'] = ['idealObserver']#, 'hybrid4']
-    #manipulatedVariables['attentionType'] = ['hybrid4', 'preAttention']
-    manipulatedVariables['attentionType'] = ['preAttention', 'attention4', 'hybrid4', 'idealObserver']#, 'attention3', 'hybrid3']
+    manipulatedVariables['attentionType'] = ['hybrid4']#, 'preAttention']
+    #manipulatedVariables['attentionType'] = ['preAttention', 'attention4', 'hybrid4', 'idealObserver']#, 'attention3', 'hybrid3']
     #manipulatedVariables['attentionType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5', 'preAttention']
-    #manipulatedVariables['measure'] = ['attentionNumber']
-    manipulatedVariables['measure'] = ['identity']
-    manipulatedVariables['chasingSubtlety'] = [500.0]
+    manipulatedVariables['measure'] = ['attentionNumber']
+    #manipulatedVariables['measure'] = ['identity']
+    manipulatedVariables['chasingSubtlety'] = [3.3]
     
     manipulatedVariables['CForStateWidening'] = [2]
     #manipulatedVariables['minAttentionDistance'] = [8.5, 12.5]#[18.0, 40.0]
-    manipulatedVariables['minAttentionDistance'] = [5.0, 10.0, 20.0, 40.0]
-    manipulatedVariables['rangeAttention'] = [5.0, 10.0, 20.0, 40.0]#, 6.2, 6.3]
-    manipulatedVariables['cBase'] = [50]
+    manipulatedVariables['minAttentionDistance'] = [10.0]#[5.0, 10.0, 20.0, 40.0]
+    manipulatedVariables['rangeAttention'] = [10.0]#[5.0, 10.0, 20.0, 40.0]#, 6.2, 6.3]
+    manipulatedVariables['cBase'] = [44]
     manipulatedVariables['numTrees'] = [1]
     manipulatedVariables['numSimulationTimes'] = [1]
     manipulatedVariables['actionRatio'] = [0.2]
@@ -89,16 +89,16 @@ def main():
             #    grp['human'] = [0.6, 0.37, 0.24]
             #    grp['human'] = [0.6, 0.48, 0.37, 0.25, 0.24, 0.42, 0.51]
             #    grp.plot.line(ax = axForDraw, y = 'human', label = 'human', ylim = (0, 0.7), marker = 'o', rot = 0 )
-            grp.plot.line(ax = axForDraw, y = 'model', label = str(attentionType), ylim = (0, 1.1), marker = 'o', ms = 3, rot = 0 )
+            grp.plot.line(ax = axForDraw, y = 'model', label = str(attentionType), ylim = (0, 4.1), marker = 'o', ms = 3, rot = 0 )
        
         plotCounter = plotCounter + 1
 
-    #plt.suptitle('Measurement = Perception Rate')
+    plt.suptitle('Measurement = Perception Rate')
     #plt.suptitle('Measurement = Action Deviation')
     #plt.suptitle('Measurement = Velocity Diff')
-    plt.suptitle('Measurement = Escape rate')
-    fig.text(x = 0.5, y = 0.92, s = 'Min Attention Distance', ha = 'center', va = 'center')
-    #fig.text(x = 0.05, y = 0.5, s = 'Attention Range', ha = 'center', va = 'center', rotation=90)
+    #plt.suptitle('Measurement = Escape rate')
+    #fig.text(x = 0.5, y = 0.92, s = 'Min Attention Distance', ha = 'center', va = 'center')
+    fig.text(x = 0.05, y = 0.5, s = 'Attention Range', ha = 'center', va = 'center', rotation=90)
     fig.text(x = 0.05, y = 0.5, s = 'Number of Simulations', ha = 'center', va = 'center', rotation=90)
     plt.show()
 
