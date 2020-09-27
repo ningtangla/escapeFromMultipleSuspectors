@@ -30,7 +30,7 @@ class ResetBeliefAndAttention():
         priorIndex=pd.MultiIndex.from_tuples(hypothesisLevel,names=name)
         p=[np.log(1.0/len(priorIndex))]*len(priorIndex)
         initialHypothesisInformation=pd.DataFrame(p,priorIndex,columns=['logP'])
-        initialHypothesisInformation['logPAttentionPrior']=initialHypothesisInformation['logP'].values
+        #initialHypothesisInformation['logPAttentionPrior']=initialHypothesisInformation['logP'].values
         allPairs = initialHypothesisInformation.groupby(['wolfIdentity','sheepIdentity']).mean().index
         attentionStatusForPair=np.random.multinomial(self.attentionLimitation,[1/len(allPairs)]*len(allPairs))
         attentionStatusForHypothesis=list(attentionStatusForPair)*numberSubtlety

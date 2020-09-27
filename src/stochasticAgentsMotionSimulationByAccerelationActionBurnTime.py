@@ -63,6 +63,7 @@ class ResetPhysicalState():
         #startAgentVelocities = np.array([[0, 0] for agentId in range(self.numAgent)])
         startAgentVelocities = np.array([ag.transitePolarToCartesian(np.random.uniform(-math.pi, math.pi)) for agentId in range(self.numAgent)])
         startAgentVelocities[0] = np.array([0, 0])
+        #startAgentVelocities = np.array([[0, 0] for _ in range(self.numAgent)])
         startTimeStep = np.array([0])
         startPhysicalState = [startAgentPositions, startAgentVelocities, startTimeStep, startWolfIdAndSubtlety]
         return startPhysicalState

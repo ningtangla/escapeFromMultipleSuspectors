@@ -63,7 +63,7 @@ class RunMCTSTrjactory:
                 rootNodes = [self.makeDiffSimulationRoot(action, currState) for treeIndex in range(self.numTree)]
                 actions = mcts(rootNodes)
                 rootNodesOnTruth = [Node(id={action: currState}, numVisited=0, sumValue=0, is_expanded = False) for _ in range(self.numTree)]
-                actionsOnTruth = mcts(rootNodesOnTruth)
+                actionsOnTruth = np.array([[0, 3.4]])#mcts(rootNodesOnTruth)
                 #actionSpace = [(np.cos(degreeInPolar), np.sin(degreeInPolar)) for degreeInPolar in np.arange(0, 360, 8)/180 * math.pi] 
                 #actions = [actionSpace[np.random.choice(range(len(actionSpace)))]]
             action = actions[int(runningStep/self.actionUpdateFrequecy) % self.planFrequency]
@@ -121,13 +121,13 @@ class RunOneCondition:
         softParaForIdentity = condition['softId']
         softParaForSubtlety = condition['softSubtlety']
 
-        numSub = 1
+        numSub = 5
         allIdentityResults = []
         allPerceptionResults = []
         allActionResults = []
         allVelDiffResults = []
         allResults = []
-        possibleTrialSubtleties = [500.0, 3.3, 0.92]
+        possibleTrialSubtleties = [500.0, 3.3, 1.83, 0.92, 0.001]
         for subIndex in range(numSub):
             meanIdentiyOnConditions = {}
             meanPerceptionOnConditions = {}
@@ -177,7 +177,7 @@ class RunOneCondition:
                 checkBoundaryAndAdjust = ag.CheckBoundaryAndAdjust(xBoundary, yBoundary) 
                 transiteMultiAgentMotion = ag.TransiteMultiAgentMotion(checkBoundaryAndAdjust)
                
-                minDistance = 2.5 * distanceToVisualDegreeRatio
+                minDistance = 0.0 * distanceToVisualDegreeRatio
                 isTerminal = env.IsTerminal(sheepId, minDistance)
                # screen = pg.display.set_mode([xBoundary[1], yBoundary[1]])
                # screenColor = np.array([0, 0, 0])
@@ -306,7 +306,7 @@ class RunOneCondition:
 
                 numActionSpace = 8
                 actionInterval = int(360/(numActionSpace))
-                actionMagnitude = actionRatio * minSheepSpeed
+                actionMagnitude = actionRatio * minSheepSpeed * numFramePerSecond
                 actionSpace = [(np.cos(degreeInPolar) * actionMagnitude, np.sin(degreeInPolar) * actionMagnitude) for degreeInPolar in np.arange(0, 360, actionInterval)/180 * math.pi] 
                 getActionPrior = lambda state : {action: 1/len(actionSpace) for action in actionSpace}
 
@@ -345,7 +345,7 @@ class RunOneCondition:
                 runMCTSTrjactory = RunMCTSTrjactory(maxRunningSteps, numTree, numActionPlaned, sheepActionUpdateFrequency, transitionFunctionInPlay, isTerminal, makeDiffSimulationRoot, render)
 
                 rootAction = actionSpace[np.random.choice(range(numActionSpace))]
-                numTrial = 1
+                numTrial = 10
                 trajectories = [runMCTSTrjactory(pwMultipleTrees) for trial in range(numTrial)]
                
                 savePath = getSavePath({'chasingSubtlety': chasingSubtlety, 'subIndex': subIndex})
@@ -462,7 +462,7 @@ def main():
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [1]
     manipulatedVariables['numSimulationTimes'] = [1]
-    manipulatedVariables['actionRatio'] = [0.2]
+    manipulatedVariables['actionRatio'] = [0.01]
     manipulatedVariables['burnTime'] = [0]
     manipulatedVariables['softId'] = [3, 9]
     manipulatedVariables['softSubtlety'] = [9]

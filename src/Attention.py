@@ -55,7 +55,7 @@ class AttentionSwitch():
         numOtherCondtionBeyondPair = hypothesisInformation.groupby(['wolfIdentity','sheepIdentity']).size().values[0]
         newAttentionStatus=list(np.random.multinomial(self.attentionLimitation, posteriorOnAttentionSlot))*numOtherCondtionBeyondPair
         newHypothesisInformation['attentionStatus']=np.array(newAttentionStatus)
-        newHypothesisInformation['logPAttentionPrior'] = hypothesisInformation['logP'] + np.log(distancePriorOnHypothesisAttention)
+        #newHypothesisInformation['logPAttentionPrior'] = hypothesisInformation['logP'] + np.log(distancePriorOnHypothesisAttention)
         return newHypothesisInformation
 
 class AttentionToPrecisionAndDecay():

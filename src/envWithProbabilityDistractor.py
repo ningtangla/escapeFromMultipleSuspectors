@@ -47,7 +47,8 @@ class TransiteStateWithoutActionChange():
         for frame in range(self.maxFrame):
             physicalState, beliefAndAttention = state 
             agentStates, agentActions, timeStep, wolfIdAndSubtlety = physicalState
-            changeLabel = 1 * (np.random.randint(0, self.maxFrame, len(agentStates)))
+            change = np.random.randint(0, self.maxFrame, len(agentStates))
+            changeLabel = 1 * (change == 0)
             changeLabel[0] = 0
             changeLabel[wolfIdAndSubtlety[0]] = 0
             currentActionsPolar = np.array([ag.transiteCartesianToPolar(action) for action in agentActions])

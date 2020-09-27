@@ -127,7 +127,7 @@ class RunOneCondition:
         allActionResults = []
         allVelDiffResults = []
         allResults = []
-        possibleTrialSubtleties = [500.0, 3.3, 0.92]
+        possibleTrialSubtleties = [500.0]#, 3.3, 0.92]
         for subIndex in range(numSub):
             meanIdentiyOnConditions = {}
             meanPerceptionOnConditions = {}
@@ -457,7 +457,7 @@ def main():
     #manipulatedVariables['attentionType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
     #manipulatedVariables['attentionType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5']
     manipulatedVariables['CForStateWidening'] = [2]
-    manipulatedVariables['minAttentionDistance'] = [10.0, 20.0, 40.0]
+    manipulatedVariables['minAttentionDistance'] = [40.0]#[10.0, 20.0, 40.0]
     manipulatedVariables['rangeAttention'] = [10.0]
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [1]
