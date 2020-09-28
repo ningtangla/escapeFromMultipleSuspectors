@@ -470,7 +470,7 @@ def main():
     manipulatedVariables['rangeAttention'] = [10.0]
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [1, 2]
-    manipulatedVariables['numSimulationTimes'] = [101]
+    manipulatedVariables['numSimulationTimes'] = [103]
     manipulatedVariables['actionRatio'] = [0.02, 0.05]
     manipulatedVariables['burnTime'] = [0]
     manipulatedVariables['softId'] = [1, 9]
