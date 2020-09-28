@@ -47,17 +47,17 @@ class TransiteStateWithoutActionChange():
         for frame in range(self.maxFrame):
             physicalState, beliefAndAttention = state 
             agentStates, agentActions, timeStep, wolfIdAndSubtlety = physicalState
+            if self.renderOn == True:
+                self.render(state)
+            if self.isTerminal(state):
+                break
             change = np.random.randint(0, self.maxFrame, len(agentStates))
             changeLabel = 1 * (change == 0)
             changeLabel[0] = 0
             changeLabel[wolfIdAndSubtlety[0]] = 0
             currentActionsPolar = np.array([ag.transiteCartesianToPolar(action) for action in agentActions])
-            polarAfterChange = np.random.uniform(-math.pi*1/3, math.pi*1/3) * np.array(changeLabel) + currentActionsPolar
+            polarAfterChange = np.random.uniform(-math.pi*1/3, math.pi*1/3, len(agentStates)) * np.array(changeLabel) + currentActionsPolar
             actionsAfterChange = np.array([ag.transitePolarToCartesian(polar) for polar in polarAfterChange]) * np.linalg.norm(agentActions[1])
-            if self.renderOn == True:
-                self.render(state)
-            if self.isTerminal(state):
-                break
             newAgentStates, newAgentActions = self.transiteMultiAgentMotion(agentStates, actionsAfterChange) 
             newPhysicalState = [newAgentStates, newAgentActions, timeStep, wolfIdAndSubtlety]
             stateAfterNoActionChangeTransition = [newPhysicalState, beliefAndAttention]
