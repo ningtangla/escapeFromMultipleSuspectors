@@ -45,7 +45,7 @@ class AttentionSwitch():
         sheepLoc = positionDF.loc[sheepObjNums]
         
         distanceBetweenWolfAndSheep = np.sqrt(np.sum(np.power(wolfLoc.values - sheepLoc.values, 2), axis = 1))
-        distancePriorOnHypothesisAttention = self.calDistancePriorOnAttentionSlot(distanceBetweenWolfAndSheep) + 1e-100
+        distancePriorOnHypothesisAttention = self.calDistancePriorOnAttentionSlot(distanceBetweenWolfAndSheep) + 1e-50
         probabilityOnHypothesisAttention = np.exp(hypothesisInformation['logP']) * distancePriorOnHypothesisAttention
         #posteriorOnHypothesisAttention = probabilityOnHypothesisAttention/probabilityOnHypothesisAttention.sum()
         probabilityOnAttentionSlotByGroupbySum = probabilityOnHypothesisAttention.groupby(['wolfIdentity','sheepIdentity']).sum().values
@@ -55,7 +55,7 @@ class AttentionSwitch():
         numOtherCondtionBeyondPair = hypothesisInformation.groupby(['wolfIdentity','sheepIdentity']).size().values[0]
         newAttentionStatus=list(np.random.multinomial(self.attentionLimitation, posteriorOnAttentionSlot))*numOtherCondtionBeyondPair
         newHypothesisInformation['attentionStatus']=np.array(newAttentionStatus)
-        #newHypothesisInformation['logPAttentionPrior'] = hypothesisInformation['logP'] + np.log(distancePriorOnHypothesisAttention)
+        newHypothesisInformation['logPAttentionPrior'] = hypothesisInformation['logP'] + np.log(distancePriorOnHypothesisAttention)
         return newHypothesisInformation
 
 class AttentionToPrecisionAndDecay():

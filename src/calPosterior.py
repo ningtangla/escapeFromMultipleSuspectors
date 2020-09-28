@@ -22,8 +22,8 @@ class CalPosteriorLog():
         hypothesesInformation['logP'] = hypothesesInformation['beforeLogPAfterDecay'] + hypothesesInformation['chasingLikelihoodLog'] \
                                         + hypothesesInformation['escapingLikelihoodLog'] + distanceLikelihoodLog
         logP = np.array(hypothesesInformation['logP'].values)
-        if np.max(logP) <= -500:
-            logPAdjusted = logP + 500
+        if np.max(logP) <= -400:
+            logPAdjusted = logP + 400
             hypothesesInformation['logP'] = logPAdjusted
 
         #originLogP = hypothesesInformation['logP'].values

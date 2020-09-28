@@ -29,7 +29,7 @@ def main():
     manipulatedVariables['CForStateWidening'] = [2]
     #manipulatedVariables['minAttentionDistance'] = [8.5, 12.5]#[18.0, 40.0]
     manipulatedVariables['minAttentionDistance'] = [20.0, 40.0]
-    manipulatedVariables['rangeAttention'] = [6.1]#, 6.2, 6.3]
+    manipulatedVariables['rangeAttention'] = [6.2]# 6.2, 6.3]
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [2]
     manipulatedVariables['numSimulationTimes'] = [150, 250]

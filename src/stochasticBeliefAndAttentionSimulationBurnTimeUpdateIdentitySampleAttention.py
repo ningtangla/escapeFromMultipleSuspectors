@@ -30,7 +30,7 @@ class ResetBeliefAndAttention():
         priorIndex=pd.MultiIndex.from_tuples(hypothesisLevel,names=name)
         p=[np.log(1.0/len(priorIndex))]*len(priorIndex)
         initialHypothesisInformation=pd.DataFrame(p,priorIndex,columns=['logP'])
-        #initialHypothesisInformation['logPAttentionPrior']=initialHypothesisInformation['logP'].values
+        initialHypothesisInformation['logPAttentionPrior']=initialHypothesisInformation['logP'].values
         allPairs = initialHypothesisInformation.groupby(['wolfIdentity','sheepIdentity']).mean().index
         attentionStatusForPair=np.random.multinomial(self.attentionLimitation,[1/len(allPairs)]*len(allPairs))
         attentionStatusForHypothesis=list(attentionStatusForPair)*numberSubtlety
@@ -107,9 +107,9 @@ class UpdateBeliefAndAttentionState():
         return newBeliefAndAttention
 
 class UpdatePhysicalStateImagedByBelief():
-    def __init__(self, updateFrequency, softParaForIdentiy, softParaForSubtlety):
+    def __init__(self, updateFrequency, softParaForIdentity, softParaForSubtlety):
         self.updateFrequency = updateFrequency
-        self.softParaForIdentiy = softParaForIdentiy
+        self.softParaForIdentity = softParaForIdentity
         self.softParaForSubtlety = softParaForSubtlety
     def __call__(self, state):
         physicalState, beliefAndAttention = state 
@@ -117,14 +117,17 @@ class UpdatePhysicalStateImagedByBelief():
         if timeStep % self.updateFrequency == 0:
 
             hypothesisInformation, positionOldTimeDF = beliefAndAttention
-            attentedHypothesis = hypothesisInformation['attentionStatus']
-            attentedIdentity = attentedHypothesis.groupby(['wolfIdentity', 'sheepIdentity']).mean() 
-            posteriorOnIdentitySlot = attentedIdentity.values / np.sum(attentedIdentity.values)
-            softenPosteriorIdentityUnormalized = [np.power(prob, self.softParaForIdentiy) for prob in posteriorOnIdentitySlot]
+            #attentedHypothesis = hypothesisInformation['attentionStatus']
+            #attentedIdentity = attentedHypothesis.groupby(['wolfIdentity', 'sheepIdentity']).mean() 
+            #posteriorOnIdentitySlot = attentedIdentity.values / np.sum(attentedIdentity.values)
+            probabilityOnHypothesisIdentity = np.exp(hypothesisInformation['logPAttentionPrior'])
+            probabilityOnIdentitySlotByGroupbySum = probabilityOnHypothesisIdentity.groupby(['wolfIdentity','sheepIdentity']).sum()
+            posteriorOnIdentitySlot = probabilityOnIdentitySlotByGroupbySum.values/np.sum(probabilityOnIdentitySlotByGroupbySum.values)
+            softenPosteriorIdentityUnormalized = [np.power(prob, self.softParaForIdentity) for prob in posteriorOnIdentitySlot]
             softenPosteriorIdentity = np.array(softenPosteriorIdentityUnormalized) / np.sum(softenPosteriorIdentityUnormalized)
 
             sampledIdentityIndex = list(np.random.multinomial(1, softenPosteriorIdentity)).index(1)
-            beliefWolfId, beliefSheepId = attentedIdentity.index[sampledIdentityIndex]
+            beliefWolfId, beliefSheepId = probabilityOnIdentitySlotByGroupbySum.index[sampledIdentityIndex]
             #maxIndex = np.argwhere(posteriorOnIdentitySlot == np.max(posteriorOnIdentitySlot)).flatten()
             #beliefWolfId = np.random.choice(maxIndex) + 1
             #beliefWolfId = list(np.random.multinomial(1, softenPosteriorIdentity)).index(1) + 1

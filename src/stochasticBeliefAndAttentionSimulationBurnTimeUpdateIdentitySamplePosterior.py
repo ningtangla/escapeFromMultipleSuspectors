@@ -30,7 +30,7 @@ class ResetBeliefAndAttention():
         priorIndex=pd.MultiIndex.from_tuples(hypothesisLevel,names=name)
         p=[np.log(1.0/len(priorIndex))]*len(priorIndex)
         initialHypothesisInformation=pd.DataFrame(p,priorIndex,columns=['logP'])
-        #initialHypothesisInformation['logPAttentionPrior']=initialHypothesisInformation['logP'].values
+        initialHypothesisInformation['logPAttentionPrior']=initialHypothesisInformation['logP'].values
         allPairs = initialHypothesisInformation.groupby(['wolfIdentity','sheepIdentity']).mean().index
         attentionStatusForPair=np.random.multinomial(self.attentionLimitation,[1/len(allPairs)]*len(allPairs))
         attentionStatusForHypothesis=list(attentionStatusForPair)*numberSubtlety
@@ -107,9 +107,9 @@ class UpdateBeliefAndAttentionState():
         return newBeliefAndAttention
 
 class UpdatePhysicalStateImagedByBelief():
-    def __init__(self, updateFrequency, softParaForIdentiy, softParaForSubtlety):
+    def __init__(self, updateFrequency, softParaForIdentity, softParaForSubtlety):
         self.updateFrequency = updateFrequency
-        self.softParaForIdentiy = softParaForIdentiy
+        self.softParaForIdentity = softParaForIdentity
         self.softParaForSubtlety = softParaForSubtlety
     def __call__(self, state):
         physicalState, beliefAndAttention = state 
@@ -130,11 +130,11 @@ class UpdatePhysicalStateImagedByBelief():
             
             #maxIndex = np.argwhere(posteriorOnIdentitySlot == np.max(posteriorOnIdentitySlot)).flatten()
             #beliefWolfId = np.random.choice(maxIndex) + 1
-            softenPosteriorIdentityUnormalized = [np.power(prob, self.softParaForIdentiy) for prob in posteriorOnIdentitySlot]
+            softenPosteriorIdentityUnormalized = [np.power(prob, self.softParaForIdentity) for prob in posteriorOnIdentitySlot]
             softenPosteriorIdentity = np.array(softenPosteriorIdentityUnormalized) / np.sum(softenPosteriorIdentityUnormalized)
             sampledIdentityIndex = list(np.random.multinomial(1, softenPosteriorIdentity)).index(1)
             beliefWolfId, beliefSheepId = probabilityOnIdentitySlotByGroupbySum.index[sampledIdentityIndex]
-            
+            #print(softenPosteriorIdentity)
             subtletyInformation = hypothesisInformation[hypothesisInformation.index.get_level_values('wolfIdentity') == beliefWolfId]['logP']
             originSubtletyProbs = np.exp(subtletyInformation.values)
             posteriorOnSubtlety = originSubtletyProbs / np.sum(originSubtletyProbs) 

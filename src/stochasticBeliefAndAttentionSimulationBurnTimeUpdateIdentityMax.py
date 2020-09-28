@@ -107,9 +107,9 @@ class UpdateBeliefAndAttentionState():
         return newBeliefAndAttention
 
 class UpdatePhysicalStateImagedByBelief():
-    def __init__(self, updateFrequency, softParaForIdentiy, softParaForSubtlety):
+    def __init__(self, updateFrequency, softParaForIdentity, softParaForSubtlety):
         self.updateFrequency = updateFrequency
-        self.softParaForIdentiy = softParaForIdentiy
+        self.softParaForIdentity = softParaForIdentity
         self.softParaForSubtlety = softParaForSubtlety
     def __call__(self, state):
         physicalState, beliefAndAttention = state 
