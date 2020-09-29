@@ -113,7 +113,7 @@ class DrawPlanningAna:
         self.drawBackGround = drawBackGround
         self.updateColorByPosterior = updateColorByPosterior
         self.drawCircleOutside = drawCircleOutside
-        self.precisionToSubtletyDict = {500.0:5,50.0:5,11.0:30,3.3:60,1.83:90,0.92:120,0.31:150,0.001:179}
+        self.precisionToSubtletyDict = {500.0:5,50.0:5,11.0:30,3.3:60,1.83:90,0.92:120,0.31:150,0.01:179}
 
     def __call__(self, timeStep, nextTimeStep):
         fpsClock = pg.time.Clock()

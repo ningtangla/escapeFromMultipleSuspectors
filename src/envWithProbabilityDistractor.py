@@ -58,6 +58,8 @@ class TransiteStateWithoutActionChange():
             currentActionsPolar = np.array([ag.transiteCartesianToPolar(action) for action in agentActions])
             polarAfterChange = np.random.uniform(-math.pi*1/3, math.pi*1/3, len(agentStates)) * np.array(changeLabel) + currentActionsPolar
             actionsAfterChange = np.array([ag.transitePolarToCartesian(polar) for polar in polarAfterChange]) * np.linalg.norm(agentActions[1])
+            actionsAfterChange[0] = actionsAfterChange[0] * 1.0 * np.linalg.norm(agentActions[0]) / np.linalg.norm(agentActions[1])
+            #print(np.linalg.norm(actionsAfterChange[0]), np.linalg.norm(actionsAfterChange[1]))
             newAgentStates, newAgentActions = self.transiteMultiAgentMotion(agentStates, actionsAfterChange) 
             newPhysicalState = [newAgentStates, newAgentActions, timeStep, wolfIdAndSubtlety]
             stateAfterNoActionChangeTransition = [newPhysicalState, beliefAndAttention]

@@ -68,17 +68,19 @@ class ResetPhysicalState():
         return startPhysicalState
 
 class SheepPolicy():
-    def __init__(self, updateFrequency, startMaxSheepSpeed, endMaxSheepSpeed, warmUpTimeSteps, burnTime):
+    def __init__(self, updateFrequency, startMaxSheepSpeed, endMaxSheepSpeed, warmUpTimeSteps, burnTime, damp):
         self.updateFrequency = updateFrequency
         self.startMaxSheepSpeed = startMaxSheepSpeed
         self.endMaxSheepSpeed = endMaxSheepSpeed
         self.warmUpTimeSteps = warmUpTimeSteps
         self.burnTime = burnTime
+        self.damp = damp
     def __call__(self, sheepPos, sheepAccer, oldSheepVel, timeStep):
         if timeStep % self.updateFrequency == 0:
             warmUpRate = min(1, timeStep/self.warmUpTimeSteps)
             sheepMaxSpeed = self.startMaxSheepSpeed + (self.endMaxSheepSpeed - self.startMaxSheepSpeed) * warmUpRate
-            sheepVel = np.array(oldSheepVel) + np.array(sheepAccer) * int(timeStep > self.burnTime)
+            dampedSheepVel = oldSheepVel * (1 - self.damp) 
+            sheepVel = np.array(dampedSheepVel) + np.array(sheepAccer) * int(timeStep > self.burnTime)
             sheepSpeed = np.linalg.norm(sheepVel, ord = 2)
             if sheepSpeed > sheepMaxSpeed:
                 sheepVel = np.array(sheepVel) / sheepSpeed * sheepMaxSpeed 

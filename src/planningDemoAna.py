@@ -36,7 +36,7 @@ def main():
     CForStateWidening = 2
     cBase = 50
     numTrees = 1
-    numSimulationTimes = 151
+    numSimulationTimes = 103
     trajectoryFixedParameters = {'alphaForStateWidening': alphaForStateWidening, 'CForStateWidening': CForStateWidening,
             'cBase': cBase, 'numTrees': numTrees, 'numSimulationTimes': numSimulationTimes}
     trajectoryExtension = '.pickle'
@@ -44,15 +44,15 @@ def main():
 
     # Compute Statistics on the Trajectories
     loadTrajectories = LoadTrajectories(getTrajectorySavePath, loadFromPickle)
-    minAttentionDistance = 40
+    minAttentionDistance = 40.0
     rangeAttention = 10.0
-    actionRatio = 0.2
+    actionRatio = 0.02
     burnTime = 0
     softId = 1
     softSubtlety = 1
     trajectoryParameters = {'minAttentionDistance': minAttentionDistance, 'rangeAttention': rangeAttention, 'actionRatio': actionRatio, 
             'burnTime': burnTime, 'softId': softId, 'softSubtlety': softSubtlety}
-    chasingSubtlety = 500.0
+    chasingSubtlety = 0.01
     subIndex = 0
     attentionType = 'idealObserver'
     #attentionType = 'preAttention'
@@ -78,7 +78,7 @@ def main():
     circleSize = 10
     positionIndex = [0, 1]
     agentIdsToDraw = list(range(numSheep + numWolves))
-    saveImage = True
+    saveImage = False
     imageSavePath = os.path.join(trajectoryDirectory, 'picMovingSheep')
     if not os.path.exists(imageSavePath):
         os.makedirs(imageSavePath)
@@ -114,11 +114,11 @@ def main():
     
     print(len(trajectories))
     lens = [len(trajectory) for trajectory in trajectories]
-    index = np.argsort(-np.array(lens))
+    index = np.argsort(np.array(lens))
     print(index)
-    print(trajectories[0][1])
-    [chaseTrial(trajectory) for trajectory in np.array(trajectories)[index[0:10]]]
     print([len(trajectory) for trajectory in np.array(trajectories)[index[:]]])
+    #print(trajectories[0][1])
+    [chaseTrial(trajectory) for trajectory in np.array(trajectories)[index[0:10]]]
     #[chaseTrial(trajectory) for trajectory in np.array(trajectories)[index[13:14]]]
 
 if __name__ == '__main__':
