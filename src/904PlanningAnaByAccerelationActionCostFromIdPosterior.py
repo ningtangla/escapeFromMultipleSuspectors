@@ -315,10 +315,14 @@ class RunOneCondition:
                 rewardFunction = reward.RewardFunctionTerminalPenalty(sheepId, aliveBouns, actionCost, deathPenalty, isTerminal)  
                 rewardRollout = lambda state, action, nextState: rewardFunction(state, action) 
 
-                numActionSpace = 8
+                numActionSpace = 4
                 actionInterval = int(360/(numActionSpace))
                 actionMagnitude = actionRatio * minSheepSpeed * numFramePerSecond
-                actionSpace = [(0, 0)] + [(np.cos(degreeInPolar) * actionMagnitude, np.sin(degreeInPolar) * actionMagnitude) for degreeInPolar in np.arange(0, 360, actionInterval)/180 * math.pi] 
+                actionSpaceFull = [(np.cos(degreeInPolar) * actionMagnitude, np.sin(degreeInPolar) * actionMagnitude) 
+                        for degreeInPolar in np.arange(0, 360, ctionInterval)/180 * math.pi] 
+                actionSpaceHalf = [(np.cos(degreeInPolar) * actionMagnitude * 0.5, np.sin(degreeInPolar) * actionMagnitude * 0.5) 
+                        for degreeInPolar in np.arange(0, 360, actionInterval)/180 * math.pi] 
+                actionSpace = [(0, 0)] + actionSpaceFull + actionSpaceHalf
                 getActionPrior = lambda state : {action: 1/len(actionSpace) for action in actionSpace}
 
                 cInit = 1
@@ -468,17 +472,17 @@ def main():
     #manipulatedVariables['attentionType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
     #manipulatedVariables['attentionType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5']
     manipulatedVariables['C'] = [2]
-    manipulatedVariables['minAttDist'] = [10.0, 40.0]#[10.0, 20.0, 40.0]
-    manipulatedVariables['rangeAtt'] = [10.0]
+    manipulatedVariables['minAttDist'] = [5.0, 10.0]#[10.0, 20.0, 40.0]
+    manipulatedVariables['rangeAtt'] = [5.0, 10.0]
     manipulatedVariables['cBase'] = [50]
-    manipulatedVariables['numTrees'] = [1, 2]
-    manipulatedVariables['numSim'] = [104]
-    manipulatedVariables['actRatio'] = [0.02, 0.05]
+    manipulatedVariables['numTrees'] = [2, 4]
+    manipulatedVariables['numSim'] = [124]
+    manipulatedVariables['actRatio'] = [0.005, 0.05]
     manipulatedVariables['burnTime'] = [0]
-    manipulatedVariables['softId'] = [1, 9]
+    manipulatedVariables['softId'] = [1]
     manipulatedVariables['softSubtlety'] = [1]
-    manipulatedVariables['actCost'] = [0.0, 0.03]
-    manipulatedVariables['damp'] = [0.0, 0.15]
+    manipulatedVariables['actCost'] = [0.0, 0.05]
+    manipulatedVariables['damp'] = [0.0, 0.25]
  
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
     parametersAllCondtion = [dict(list(specificValueParameter)) for specificValueParameter in productedValues]
