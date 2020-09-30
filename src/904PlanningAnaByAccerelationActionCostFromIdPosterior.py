@@ -285,7 +285,7 @@ class RunOneCondition:
                 updateBeliefAndAttentionInSimulation = ba.UpdateBeliefAndAttentionState(attention, computePosterior, attentionSwitch, transferMultiAgentStatesToPositionDF,
                         attentionSwitchFrequencyInSimulation, beliefUpdateFrequencyInSimulation, burnTime)
 
-                attentionSwitchFrequencyInPlay = int(0.6 * numMDPTimeStepPerSecond)
+                attentionSwitchFrequencyInPlay = int(0.2 * numMDPTimeStepPerSecond)
                 beliefUpdateFrequencyInPlay = int(0.2 * numMDPTimeStepPerSecond)
                 updateBeliefAndAttentionInPlay = ba.UpdateBeliefAndAttentionState(attention, computePosterior, attentionSwitch, transferMultiAgentStatesToPositionDF, 
                         attentionSwitchFrequencyInPlay, beliefUpdateFrequencyInPlay, burnTime)
@@ -296,12 +296,14 @@ class RunOneCondition:
                 reUpdatePhysicalStateByBeliefInSimulationRoot = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInSimulationRoot,
                         softParaForIdentity = 1, softParaForSubtlety = 1)
                 updatePhysicalStateByBeliefFrequencyInSimulation = np.inf
-                updatePhysicalStateByBeliefInSimulation = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInSimulation,
-                        softParaForIdentity, softParaForSubtlety)
+                #updatePhysicalStateByBeliefInSimulation = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInSimulation,
+                #        softParaForIdentity, softParaForSubtlety)
+                updatePhysicalStateByBeliefInSimulation = lambda state: state
                 
                 updatePhysicalStateByBeliefFrequencyInPlay = np.inf
-                updatePhysicalStateByBeliefInPlay = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInPlay,
-                        softParaForIdentity, softParaForSubtlety)
+                #updatePhysicalStateByBeliefInPlay = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInPlay,
+                #        softParaForIdentity, softParaForSubtlety)
+                updatePhysicalStateByBeliefInPlay = lambda state: state
 
                 transitionFunctionInSimulation = env.TransitionFunction(resetPhysicalState, resetBeliefAndAttention, updatePhysicalState, transiteStateWithoutActionChangeInSimulation, 
                         updateBeliefAndAttentionInSimulation, updatePhysicalStateByBeliefInSimulation)
@@ -309,21 +311,21 @@ class RunOneCondition:
                 transitionFunctionInPlay = env.TransitionFunction(resetPhysicalState, resetBeliefAndAttention, updatePhysicalState, transiteStateWithoutActionChangeInPlay, 
                         updateBeliefAndAttentionInPlay, updatePhysicalStateByBeliefInPlay)
                 
-                maxRollOutSteps = 5
-                aliveBouns = 1/maxRollOutSteps
-                deathPenalty = -1
-                rewardFunction = reward.RewardFunctionTerminalPenalty(sheepId, aliveBouns, actionCost, deathPenalty, isTerminal)  
-                rewardRollout = lambda state, action, nextState: rewardFunction(state, action) 
-
                 numActionSpace = 4
                 actionInterval = int(360/(numActionSpace))
                 actionMagnitude = actionRatio * minSheepSpeed * numFramePerSecond
                 actionSpaceFull = [(np.cos(degreeInPolar) * actionMagnitude, np.sin(degreeInPolar) * actionMagnitude) 
-                        for degreeInPolar in np.arange(0, 360, ctionInterval)/180 * math.pi] 
+                        for degreeInPolar in np.arange(0, 360, actionInterval)/180 * math.pi] 
                 actionSpaceHalf = [(np.cos(degreeInPolar) * actionMagnitude * 0.5, np.sin(degreeInPolar) * actionMagnitude * 0.5) 
                         for degreeInPolar in np.arange(0, 360, actionInterval)/180 * math.pi] 
                 actionSpace = [(0, 0)] + actionSpaceFull + actionSpaceHalf
                 getActionPrior = lambda state : {action: 1/len(actionSpace) for action in actionSpace}
+
+                maxRollOutSteps = 5
+                aliveBouns = 1/maxRollOutSteps
+                deathPenalty = -1
+                rewardFunction = reward.RewardFunctionTerminalPenalty(sheepId, aliveBouns, actionCost, deathPenalty, isTerminal, actionSpace)  
+                rewardRollout = lambda state, action, nextState: rewardFunction(state, action) 
 
                 cInit = 1
                 #cBase = 50
@@ -432,7 +434,6 @@ class RunOneCondition:
                 getEscapeAcc = lambda trajectory: int(len(trajectory) >= (maxRunningSteps - 2))
                 meanEscape = np.mean([getEscapeAcc(trajectory) for trajectory in trajectories])
                 meanEscapeOnConditions.update({chasingSubtlety: meanEscape})
-                print(meanEscapeOnConditions) 
             
             allResults.append(meanEscapeOnConditions)
             results = pd.DataFrame(allResults)
@@ -472,17 +473,17 @@ def main():
     #manipulatedVariables['attentionType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
     #manipulatedVariables['attentionType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5']
     manipulatedVariables['C'] = [2]
-    manipulatedVariables['minAttDist'] = [5.0, 10.0]#[10.0, 20.0, 40.0]
-    manipulatedVariables['rangeAtt'] = [5.0, 10.0]
+    manipulatedVariables['minAttDist'] = [10.0, 40.0]#[10.0, 20.0, 40.0]
+    manipulatedVariables['rangeAtt'] = [10.0]
     manipulatedVariables['cBase'] = [50]
-    manipulatedVariables['numTrees'] = [2, 4]
-    manipulatedVariables['numSim'] = [124]
-    manipulatedVariables['actRatio'] = [0.005, 0.05]
+    manipulatedVariables['numTrees'] = [2, 4, 8]
+    manipulatedVariables['numSim'] = [104]
+    manipulatedVariables['actRatio'] = [0.05, 0.25, 0.45]
     manipulatedVariables['burnTime'] = [0]
     manipulatedVariables['softId'] = [1]
     manipulatedVariables['softSubtlety'] = [1]
-    manipulatedVariables['actCost'] = [0.0, 0.05]
-    manipulatedVariables['damp'] = [0.0, 0.25]
+    manipulatedVariables['actCost'] = [0.0, 0.1, 0.5]
+    manipulatedVariables['damp'] = [0.0]
  
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
     parametersAllCondtion = [dict(list(specificValueParameter)) for specificValueParameter in productedValues]

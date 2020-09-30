@@ -18,11 +18,11 @@ from algorithms.stochasticPW import ScoreChild, SelectAction, SelectNextState, I
 
 from simple1DEnv import TransitionFunction, RewardFunction, Terminal
 from visualize import draw
-import stochasticAgentsMotionSimulationByAccerelationActionBurnTimeWithDamp as ag
+import stochasticAgentsMotionSimulationByDirectionActionWithProbabilityDistractor as ag
 import Attention
 import calPosterior as calPosterior
 import stochasticBeliefAndAttentionSimulationBurnTimeUpdateIdentitySampleAttention as ba
-import env
+import envWithProbabilityDistractor as env
 import rewardWithActionCost as reward
 import trajectoriesSaveLoad as tsl
 import AnalyticGeometryFunctions as agf
@@ -69,8 +69,7 @@ class RunMCTSTrjactory:
                 rootNodes = [self.makeDiffSimulationRoot(action, currState) for treeIndex in range(self.numTree)]
                 actions = mcts(rootNodes)
                 rootNodesOnTruth = [Node(id={action: currState}, numVisited=0, sumValue=0, is_expanded = False) for _ in range(self.numTree)]
-                actionsOnTruth = np.array([[0, 3.4]]) #mcts(rootNodesOnTruth)
-                #actionsOnTruth = np.array([0, 0])
+                actionsOnTruth = np.array([[0, 3.4]])#mcts(rootNodesOnTruth)
                 #actionSpace = [(np.cos(degreeInPolar), np.sin(degreeInPolar)) for degreeInPolar in np.arange(0, 360, 8)/180 * math.pi] 
                 #actions = [actionSpace[np.random.choice(range(len(actionSpace)))]]
             action = actions[int(runningStep/self.actionUpdateFrequecy) % self.planFrequency]
@@ -90,8 +89,6 @@ class RunMCTSTrjactory:
             
             trajectory.append([stateToRecord, action, physicalStateOnTruth, oppoActionPhysicalStateOnTruth, 
                 actionOnTruth, [np.array(list(rootNode.id.values())[0])[0][3] for rootNode in rootNodes]]) 
-            #print(trajectory[-1][0][0][3], trajectory[-1][0][0][2])
-            #print(trajectory[-1][5])
             currStateOnTruth = copy.deepcopy(currState)
             oppoActionCurrStateOnTruth = copy.deepcopy(currState)
 
@@ -104,7 +101,6 @@ class RunMCTSTrjactory:
             currState = nextState
             #print(trajectory[-1][5], self.transitionFunctionInPlay.updateBeliefAndAttention.attention.memoryratePerSlot,
             #        self.transitionFunctionInPlay.updatePhysicalStateByBelief.softParaForSubtlety)
-            #print(currState[1])
             #print('***', currState[0][3], trajectory[-1][5])
             #print('***', physicalState[0][0], action)
             #print('***', np.linalg.norm(physicalState[1][0]), np.linalg.norm(physicalState[1][10]))
@@ -139,7 +135,7 @@ class RunOneCondition:
         allActionResults = []
         allVelDiffResults = []
         allResults = []
-        possibleTrialSubtleties = [0.92, 0.01]#[500.0, 3.3, 1.83, 0.92, 0.01]
+        possibleTrialSubtleties = [0.92, 0.01]#[500.0, 3.3, 1.83, 0.92, 0.001]
         for subIndex in range(numSub):
             meanIdentiyOnConditions = {}
             meanPerceptionOnConditions = {}
@@ -316,20 +312,19 @@ class RunOneCondition:
                 
                 numActionSpace = 4
                 actionInterval = int(360/(numActionSpace))
-                actionMagnitude = actionRatio * minSheepSpeed * numFramePerSecond
+                actionMagnitude = 1.0#actionRatio * minSheepSpeed * numFramePerSecond
                 actionSpaceFull = [(np.cos(degreeInPolar) * actionMagnitude, np.sin(degreeInPolar) * actionMagnitude) 
                         for degreeInPolar in np.arange(0, 360, actionInterval)/180 * math.pi] 
                 actionSpaceHalf = [(np.cos(degreeInPolar) * actionMagnitude * 0.5, np.sin(degreeInPolar) * actionMagnitude * 0.5) 
                         for degreeInPolar in np.arange(0, 360, actionInterval)/180 * math.pi] 
                 actionSpace = [(0, 0)] + actionSpaceFull + actionSpaceHalf
                 getActionPrior = lambda state : {action: 1/len(actionSpace) for action in actionSpace}
-                
+
                 maxRollOutSteps = 5
                 aliveBouns = 1/maxRollOutSteps
                 deathPenalty = -1
                 rewardFunction = reward.RewardFunctionTerminalPenalty(sheepId, aliveBouns, actionCost, deathPenalty, isTerminal, actionSpace)  
                 rewardRollout = lambda state, action, nextState: rewardFunction(state, action) 
-
 
                 cInit = 1
                 #cBase = 50
@@ -395,7 +390,8 @@ class RunOneCondition:
                         timeStep = trajectory[timeStepIndex]
                         wolfId = timeStep[0][0][3][0]
                         wolfSubtlety = timeStep[0][0][3][1]
-                        #print(wolfId, '**', wolfIdInEach)
+                        #print(wolfId, '**', timeStep[5])
+                        #print(wolfSubtlety, '!!', timeStep[5])
                         if timeStepIndex >= startStatsIndex:
                             IdAndSubtletyAcc = np.mean([int((IdAndSubtlety[0] == wolfId) and (IdAndSubtlety[1] == wolfSubtlety)) for IdAndSubtlety in timeStep[5]])
                             AccTrial.append(IdAndSubtletyAcc)
@@ -478,12 +474,12 @@ def main():
     #manipulatedVariables['attentionType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
     #manipulatedVariables['attentionType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5']
     manipulatedVariables['C'] = [2]
-    manipulatedVariables['minAttDist'] = [10.0, 40.0]#[10.0, 20.0, 40.0]
+    manipulatedVariables['minAttDist'] = [5.0, 15.0, 40.0]
     manipulatedVariables['rangeAtt'] = [10.0]
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [2, 4, 8]
-    manipulatedVariables['numSim'] = [105]
-    manipulatedVariables['actRatio'] = [0.05, 0.25, 0.45]
+    manipulatedVariables['numSim'] = [159]
+    manipulatedVariables['actRatio'] = [0.05]
     manipulatedVariables['burnTime'] = [0]
     manipulatedVariables['softId'] = [1]
     manipulatedVariables['softSubtlety'] = [1]

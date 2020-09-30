@@ -105,14 +105,16 @@ class UpdateBeliefAndAttentionState():
         return newBeliefAndAttention
 
 class UpdatePhysicalStateImagedByBelief():
-    def __init__(self, updateFrequency, softParaForIdentity, softParaForSubtlety):
+    def __init__(self, updateFrequency, softParaForIdentity, softParaForSubtlety, lastIdentity = None, lastSubtlety = None):
         self.updateFrequency = updateFrequency
         self.softParaForIdentity = softParaForIdentity
         self.softParaForSubtlety = softParaForSubtlety
+        self.lastIdentity = lastIdentity
+        self.lastSubtlety = lastSubtlety
     def __call__(self, state):
         physicalState, beliefAndAttention = state 
         agentStates, agentActions, timeStep, wolfIdAndSubtlety = physicalState
-        if timeStep % self.updateFrequency == 0:
+        if (timeStep % self.updateFrequency == 0) or (timeStep <= 1):
 
             hypothesisInformation, positionOldTimeDF = beliefAndAttention
             
@@ -123,6 +125,12 @@ class UpdatePhysicalStateImagedByBelief():
             beliefWolfId, beliefSheepId, beliefWolfSubtlety = hypothesisInformation.index[sampledHypothesisIndex]
             
             wolfIdAndSubtlety = [int(beliefWolfId), beliefWolfSubtlety]
+            updatedPhysicalState = [agentStates, agentActions, timeStep, wolfIdAndSubtlety]
+            state = [updatedPhysicalState, beliefAndAttention]
+            self.lastIdentity = beliefWolfId
+            self.lastSubtlety = beliefWolfSubtlety
+        else:
+            wolfIdAndSubtlety = [int(self.lastIdentity), self.lastSubtlety]
             updatedPhysicalState = [agentStates, agentActions, timeStep, wolfIdAndSubtlety]
             state = [updatedPhysicalState, beliefAndAttention]
 

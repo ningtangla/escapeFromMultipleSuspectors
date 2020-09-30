@@ -89,7 +89,6 @@ class RunMCTSTrjactory:
             
             trajectory.append([stateToRecord, action, physicalStateOnTruth, oppoActionPhysicalStateOnTruth, 
                 actionOnTruth, [np.array(list(rootNode.id.values())[0])[0][3] for rootNode in rootNodes]]) 
-            
             currStateOnTruth = copy.deepcopy(currState)
             oppoActionCurrStateOnTruth = copy.deepcopy(currState)
 
@@ -285,7 +284,7 @@ class RunOneCondition:
                 updateBeliefAndAttentionInSimulation = ba.UpdateBeliefAndAttentionState(attention, computePosterior, attentionSwitch, transferMultiAgentStatesToPositionDF,
                         attentionSwitchFrequencyInSimulation, beliefUpdateFrequencyInSimulation, burnTime)
 
-                attentionSwitchFrequencyInPlay = int(0.6 * numMDPTimeStepPerSecond)
+                attentionSwitchFrequencyInPlay = int(0.2 * numMDPTimeStepPerSecond)
                 beliefUpdateFrequencyInPlay = int(0.2 * numMDPTimeStepPerSecond)
                 updateBeliefAndAttentionInPlay = ba.UpdateBeliefAndAttentionState(attention, computePosterior, attentionSwitch, transferMultiAgentStatesToPositionDF, 
                         attentionSwitchFrequencyInPlay, beliefUpdateFrequencyInPlay, burnTime)
@@ -296,12 +295,14 @@ class RunOneCondition:
                 reUpdatePhysicalStateByBeliefInSimulationRoot = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInSimulationRoot,
                         softParaForIdentity = 1, softParaForSubtlety = 1)
                 updatePhysicalStateByBeliefFrequencyInSimulation = np.inf
-                updatePhysicalStateByBeliefInSimulation = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInSimulation,
-                        softParaForIdentity, softParaForSubtlety)
+                #updatePhysicalStateByBeliefInSimulation = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInSimulation,
+                #        softParaForIdentity, softParaForSubtlety)
+                updatePhysicalStateByBeliefInSimulation = lambda state: state
                 
                 updatePhysicalStateByBeliefFrequencyInPlay = np.inf
-                updatePhysicalStateByBeliefInPlay = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInPlay,
-                        softParaForIdentity, softParaForSubtlety)
+                #updatePhysicalStateByBeliefInPlay = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInPlay,
+                #        softParaForIdentity, softParaForSubtlety)
+                updatePhysicalStateByBeliefInPlay = lambda state: state
 
                 transitionFunctionInSimulation = env.TransitionFunction(resetPhysicalState, resetBeliefAndAttention, updatePhysicalState, transiteStateWithoutActionChangeInSimulation, 
                         updateBeliefAndAttentionInSimulation, updatePhysicalStateByBeliefInSimulation)
@@ -309,17 +310,21 @@ class RunOneCondition:
                 transitionFunctionInPlay = env.TransitionFunction(resetPhysicalState, resetBeliefAndAttention, updatePhysicalState, transiteStateWithoutActionChangeInPlay, 
                         updateBeliefAndAttentionInPlay, updatePhysicalStateByBeliefInPlay)
                 
+                numActionSpace = 4
+                actionInterval = int(360/(numActionSpace))
+                actionMagnitude = actionRatio * minSheepSpeed * numFramePerSecond
+                actionSpaceFull = [(np.cos(degreeInPolar) * actionMagnitude, np.sin(degreeInPolar) * actionMagnitude) 
+                        for degreeInPolar in np.arange(0, 360, actionInterval)/180 * math.pi] 
+                actionSpaceHalf = [(np.cos(degreeInPolar) * actionMagnitude * 0.5, np.sin(degreeInPolar) * actionMagnitude * 0.5) 
+                        for degreeInPolar in np.arange(0, 360, actionInterval)/180 * math.pi] 
+                actionSpace = [(0, 0)] + actionSpaceFull + actionSpaceHalf
+                getActionPrior = lambda state : {action: 1/len(actionSpace) for action in actionSpace}
+
                 maxRollOutSteps = 5
                 aliveBouns = 1/maxRollOutSteps
                 deathPenalty = -1
-                rewardFunction = reward.RewardFunctionTerminalPenalty(sheepId, aliveBouns, actionCost, deathPenalty, isTerminal)  
+                rewardFunction = reward.RewardFunctionTerminalPenalty(sheepId, aliveBouns, actionCost, deathPenalty, isTerminal, actionSpace)  
                 rewardRollout = lambda state, action, nextState: rewardFunction(state, action) 
-
-                numActionSpace = 8
-                actionInterval = int(360/(numActionSpace))
-                actionMagnitude = actionRatio * minSheepSpeed * numFramePerSecond
-                actionSpace = [(0, 0)] + [(np.cos(degreeInPolar) * actionMagnitude, np.sin(degreeInPolar) * actionMagnitude) for degreeInPolar in np.arange(0, 360, actionInterval)/180 * math.pi] 
-                getActionPrior = lambda state : {action: 1/len(actionSpace) for action in actionSpace}
 
                 cInit = 1
                 #cBase = 50
@@ -372,7 +377,7 @@ class RunOneCondition:
                         wolfSubtlety = timeStep[0][0][3][1]
                         #print(wolfId, '**', wolfIdInEach)
                         if timeStepIndex >= startStatsIndex:
-                            IdAcc = [int(IdAndSubtlety[0] == wolfId) for IdAndSubtlety in timeStep[5]]
+                            IdAcc = np.mean([int(IdAndSubtlety[0] == wolfId) for IdAndSubtlety in timeStep[5]])
                             AccTrial.append(IdAcc)
                     meanAcc = np.mean(AccTrial)
                     return meanAcc
@@ -385,9 +390,10 @@ class RunOneCondition:
                         timeStep = trajectory[timeStepIndex]
                         wolfId = timeStep[0][0][3][0]
                         wolfSubtlety = timeStep[0][0][3][1]
-                        #print(wolfId, '**', wolfIdInEach)
+                        #print(wolfId, '**', timeStep[5])
+                        #print(wolfSubtlety, '!!', timeStep[5])
                         if timeStepIndex >= startStatsIndex:
-                            IdAndSubtletyAcc = [int((IdAndSubtlety[0] == wolfId) and (IdAndSubtlety[1] == wolfSubtlety)) for IdAndSubtlety in timeStep[5]]
+                            IdAndSubtletyAcc = np.mean([int((IdAndSubtlety[0] == wolfId) and (IdAndSubtlety[1] == wolfSubtlety)) for IdAndSubtlety in timeStep[5]])
                             AccTrial.append(IdAndSubtletyAcc)
                     meanAcc = np.mean(AccTrial)
                     return meanAcc
@@ -468,17 +474,17 @@ def main():
     #manipulatedVariables['attentionType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
     #manipulatedVariables['attentionType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5']
     manipulatedVariables['C'] = [2]
-    manipulatedVariables['minAttDist'] = [10.0, 40.0]#[10.0, 20.0, 40.0]
+    manipulatedVariables['minAttDist'] = [10.0]#[10.0, 20.0, 40.0]
     manipulatedVariables['rangeAtt'] = [10.0]
     manipulatedVariables['cBase'] = [50]
-    manipulatedVariables['numTrees'] = [1]
+    manipulatedVariables['numTrees'] = [2, 4, 8]
     manipulatedVariables['numSim'] = [106]
-    manipulatedVariables['actRatio'] = [0.02, 0.05]
+    manipulatedVariables['actRatio'] = [0.05, 0.25, 0.45]
     manipulatedVariables['burnTime'] = [0]
-    manipulatedVariables['softId'] = [1, 9]
+    manipulatedVariables['softId'] = [1]
     manipulatedVariables['softSubtlety'] = [1]
-    manipulatedVariables['actCost'] = [0.0, 0.03]
-    manipulatedVariables['damp'] = [0.0, 0.15]
+    manipulatedVariables['actCost'] = [0.0, 0.1, 0.5]
+    manipulatedVariables['damp'] = [0.0]
  
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
     parametersAllCondtion = [dict(list(specificValueParameter)) for specificValueParameter in productedValues]

@@ -18,7 +18,7 @@ from algorithms.stochasticPW import ScoreChild, SelectAction, SelectNextState, I
 
 from simple1DEnv import TransitionFunction, RewardFunction, Terminal
 from visualize import draw
-import stochasticAgentsMotionSimulationByAccerelationActionBurnTimeWithDamp as ag
+import stochasticAgentsMotionSimulationByDirectionAction as ag
 import Attention
 import calPosterior as calPosterior
 import stochasticBeliefAndAttentionSimulationBurnTimeUpdateIdentitySampleAttention as ba
@@ -316,7 +316,7 @@ class RunOneCondition:
                 
                 numActionSpace = 4
                 actionInterval = int(360/(numActionSpace))
-                actionMagnitude = actionRatio * minSheepSpeed * numFramePerSecond
+                actionMagnitude = 1.0#actionRatio * minSheepSpeed * numFramePerSecond
                 actionSpaceFull = [(np.cos(degreeInPolar) * actionMagnitude, np.sin(degreeInPolar) * actionMagnitude) 
                         for degreeInPolar in np.arange(0, 360, actionInterval)/180 * math.pi] 
                 actionSpaceHalf = [(np.cos(degreeInPolar) * actionMagnitude * 0.5, np.sin(degreeInPolar) * actionMagnitude * 0.5) 
@@ -478,12 +478,12 @@ def main():
     #manipulatedVariables['attentionType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
     #manipulatedVariables['attentionType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5']
     manipulatedVariables['C'] = [2]
-    manipulatedVariables['minAttDist'] = [10.0, 40.0]#[10.0, 20.0, 40.0]
+    manipulatedVariables['minAttDist'] = [5.0, 15.0, 40.0]#[10.0, 20.0, 40.0]
     manipulatedVariables['rangeAtt'] = [10.0]
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [2, 4, 8]
-    manipulatedVariables['numSim'] = [105]
-    manipulatedVariables['actRatio'] = [0.05, 0.25, 0.45]
+    manipulatedVariables['numSim'] = [58, 158]
+    manipulatedVariables['actRatio'] = [0.05]
     manipulatedVariables['burnTime'] = [0]
     manipulatedVariables['softId'] = [1]
     manipulatedVariables['softSubtlety'] = [1]

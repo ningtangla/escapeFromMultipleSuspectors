@@ -68,13 +68,12 @@ class ResetPhysicalState():
         return startPhysicalState
 
 class SheepPolicy():
-    def __init__(self, updateFrequency, minSheepSpeed, maxSheepSpeed, warmUpTimeSteps, burnTime, damp = 0):
+    def __init__(self, updateFrequency, minSheepSpeed, maxSheepSpeed, warmUpTimeSteps, burnTime):
         self.updateFrequency = updateFrequency
         self.minSheepSpeed = minSheepSpeed
         self.maxSheepSpeed = maxSheepSpeed
         self.warmUpTimeSteps = warmUpTimeSteps
         self.burnTime = burnTime
-        self.damp = damp
     def __call__(self, sheepState, sheepAction, oldSheepAction, timeStep):
         if timeStep % self.updateFrequency == 0:
             warmUpRate = min(1, timeStep/self.warmUpTimeSteps)
@@ -113,10 +112,9 @@ class DistractorPolicy():
         self.warmUpTimeSteps = warmUpTimeSteps
     def __call__(self, distractorState, oldDistractorAction, timeStep):
         if timeStep % self.updateFrequency == 0:
-            distractorPosition = np.array(distractorState)
-            oldDistractorDirectionPolar = ag.transiteCartesianToPolar(oldDistractorAction)
-            distractorDirectionPolar = np.random.uniform(-math.pi*1/3, math.pi*1/3) + oldDistractorDirectionPolar 
-            distractorDirection = ag.transitePolarToCartesian(distractorDirectionPolar)
+            distractorPosition = np.array(distractorPos)
+            oldDistractorDirectionPolar = ag.transiteCartesianToPolar(oldDistractorVel)
+            distractorDirection = ag.transitePolarToCartesian(oldDistractorDirectionPolar)
             
             warmUpRate = min(1, timeStep/self.warmUpTimeSteps)
             distractorSpeed = self.minDistractorSpeed + (self.maxDistractorSpeed - self.minDistractorSpeed) * warmUpRate
@@ -163,8 +161,12 @@ class UpdatePhysicalState():
     def __call__(self, oldPhysicalState, action):  
         oldAgentPositions, oldAgentVelocites, timeStep, wolfIdAndSubtlety = oldPhysicalState
         wolfId, wolfSubtlety = wolfIdAndSubtlety
-        #normalizedSheepAction = np.array(action)/(np.linalg.norm(action, ord = 2) + 1e-12)
-        agentPolicyFunctions = self.preparePolicy(oldAgentPositions, oldAgentVelocites, timeStep, wolfId, wolfSubtlety, action) 
+        normalizedSheepAction = np.array(action)/(np.linalg.norm(action, ord = 2) + 1e-12)
+        sheepOldVelocity = oldAgentVelocites[self.sheepId]
+        normalizedSheepOldVelocity  = np.array(sheepOldVelocity)/(np.linalg.norm(sheepOldVelocity, ord = 2) + 1e-12)
+        sheepOwnVelocity = normalizedSheepOldVelocity + normalizedSheepAction 
+        normalizedSheepOwnVelocity = sheepOwnVelocity/(np.linalg.norm(sheepOwnVelocity, ord = 2) + 1e-12)
+        agentPolicyFunctions = self.preparePolicy(oldAgentPositions, oldAgentVelocites, timeStep, wolfId, wolfSubtlety, normalizedSheepOwnVelocity) 
         agentActions = [agentPolicyFunctions[agentId](oldAgentPositions[agentId]) for agentId in self.agentIds]
         agentVelocities = agentActions.copy()
         timeStep = timeStep + 1

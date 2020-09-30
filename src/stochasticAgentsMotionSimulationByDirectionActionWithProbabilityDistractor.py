@@ -115,8 +115,7 @@ class DistractorPolicy():
         if timeStep % self.updateFrequency == 0:
             distractorPosition = np.array(distractorState)
             oldDistractorDirectionPolar = ag.transiteCartesianToPolar(oldDistractorAction)
-            distractorDirectionPolar = np.random.uniform(-math.pi*1/3, math.pi*1/3) + oldDistractorDirectionPolar 
-            distractorDirection = ag.transitePolarToCartesian(distractorDirectionPolar)
+            distractorDirection = ag.transitePolarToCartesian(oldDistractorDirectionPolar)
             
             warmUpRate = min(1, timeStep/self.warmUpTimeSteps)
             distractorSpeed = self.minDistractorSpeed + (self.maxDistractorSpeed - self.minDistractorSpeed) * warmUpRate
