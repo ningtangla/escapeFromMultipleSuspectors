@@ -23,7 +23,7 @@ import Attention
 import calPosterior as calPosterior
 import stochasticBeliefAndAttentionSimulationBurnTimeUpdateIdentitySampleAttention as ba
 import env
-import rewardWithActionCost as reward
+import rewardWithActionCostAndWolfProbability as reward
 import trajectoriesSaveLoad as tsl
 import AnalyticGeometryFunctions as agf
 
@@ -133,7 +133,7 @@ class RunOneCondition:
         damp = condition['damp']
         actionCost = condition['actCost']
 
-        numSub = 5
+        numSub = 10
         allIdentityResults = []
         allPerceptionResults = []
         allActionResults = []
@@ -473,22 +473,22 @@ def main():
     manipulatedVariables = OrderedDict()
     manipulatedVariables['alpha'] = [0.25]
     manipulatedVariables['attType'] = ['idealObserver']#, 'hybrid4']
-    #manipulatedVariables['attentionType'] = ['hybrid4', 'preAttention']
-    #manipulatedVariables['attentionType'] = ['preAttention']
-    #manipulatedVariables['attentionType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
-    #manipulatedVariables['attentionType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5']
+    #manipulatedVariables['attType'] = ['hybrid4', 'preAttention']
+    #manipulatedVariables['attType'] = ['preAttention']
+    #manipulatedVariables['attType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
+    #manipulatedVariables['attType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5']
     manipulatedVariables['C'] = [2]
     manipulatedVariables['minAttDist'] = [10.0, 40.0]#[10.0, 20.0, 40.0]
     manipulatedVariables['rangeAtt'] = [10.0]
     manipulatedVariables['cBase'] = [50]
-    manipulatedVariables['numTrees'] = [2, 4, 8]
-    manipulatedVariables['numSim'] = [105]
-    manipulatedVariables['actRatio'] = [0.05, 0.25, 0.45]
+    manipulatedVariables['numTrees'] = [4]
+    manipulatedVariables['numSim'] = [185]
+    manipulatedVariables['actRatio'] = [0.1, 0.5, 0.9]
     manipulatedVariables['burnTime'] = [0]
     manipulatedVariables['softId'] = [1]
     manipulatedVariables['softSubtlety'] = [1]
     manipulatedVariables['actCost'] = [0.0, 0.1, 0.5]
-    manipulatedVariables['damp'] = [0.0]
+    manipulatedVariables['damp'] = [0.0, 0.15, 0.3]
  
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
     parametersAllCondtion = [dict(list(specificValueParameter)) for specificValueParameter in productedValues]

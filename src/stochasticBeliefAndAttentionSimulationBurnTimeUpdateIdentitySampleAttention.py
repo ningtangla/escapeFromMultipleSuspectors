@@ -133,6 +133,9 @@ class UpdatePhysicalStateImagedByBelief():
             #maxIndex = np.argwhere(posteriorOnIdentitySlot == np.max(posteriorOnIdentitySlot)).flatten()
             #beliefWolfId = np.random.choice(maxIndex) + 1
             #beliefWolfId = list(np.random.multinomial(1, softenPosteriorIdentity)).index(1) + 1
+            numOtherCondtionBeyondPair = hypothesisInformation.groupby(['wolfIdentity','sheepIdentity']).size().values[0]
+            hypothesisInformation['identityProb'] = np.array(list(posteriorOnIdentitySlot) * numOtherCondtionBeyondPair)
+            hypothesisInformation['identitySoftenProb'] = np.array(list(softenPosteriorIdentity) * numOtherCondtionBeyondPair)
             
             subtletyInformation = hypothesisInformation[hypothesisInformation.index.get_level_values('wolfIdentity') == beliefWolfId]['logP']
             originSubtletyProbs = np.exp(subtletyInformation.values)

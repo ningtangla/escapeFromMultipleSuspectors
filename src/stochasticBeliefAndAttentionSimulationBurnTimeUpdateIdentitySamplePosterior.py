@@ -136,7 +136,11 @@ class UpdatePhysicalStateImagedByBelief():
             softenPosteriorIdentity = np.array(softenPosteriorIdentityUnormalized) / np.sum(softenPosteriorIdentityUnormalized)
             sampledIdentityIndex = list(np.random.multinomial(1, softenPosteriorIdentity)).index(1)
             beliefWolfId, beliefSheepId = probabilityOnIdentitySlotByGroupbySum.index[sampledIdentityIndex]
+            numOtherCondtionBeyondPair = hypothesisInformation.groupby(['wolfIdentity','sheepIdentity']).size().values[0]
+            hypothesisInformation['identityProb'] = np.array(list(posteriorOnIdentitySlot) * numOtherCondtionBeyondPair)
+            hypothesisInformation['identitySoftenProb'] = np.array(list(softenPosteriorIdentity) * numOtherCondtionBeyondPair)
             #print(softenPosteriorIdentity)
+            
             subtletyInformation = hypothesisInformation[hypothesisInformation.index.get_level_values('wolfIdentity') == beliefWolfId]['logP']
             originSubtletyProbs = np.exp(subtletyInformation.values)
             posteriorOnSubtlety = originSubtletyProbs / np.sum(originSubtletyProbs) 

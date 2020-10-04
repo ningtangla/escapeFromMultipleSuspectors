@@ -27,12 +27,12 @@ def main():
     #manipulatedVariables['attentionType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
     #manipulatedVariables['attentionType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5']
     manipulatedVariables['C'] = [2]
-    manipulatedVariables['minAttDist'] = [10.0, 40.0]#[10.0, 20.0, 40.0]
+    manipulatedVariables['minAttDist'] = [5.0, 15.0, 40.0]#[10.0, 20.0, 40.0]
     manipulatedVariables['rangeAtt'] = [10.0]
     manipulatedVariables['cBase'] = [50]
-    manipulatedVariables['numTrees'] = [8]#, 4, 8]
-    manipulatedVariables['numSim'] = [105]
-    manipulatedVariables['actRatio'] = [0.05, 0.25, 0.45]
+    manipulatedVariables['numTrees'] = [2, 4, 8]
+    manipulatedVariables['numSim'] = [157]
+    manipulatedVariables['actRatio'] = [0.05]
     manipulatedVariables['burnTime'] = [0]
     manipulatedVariables['softId'] = [1]
     manipulatedVariables['softSubtlety'] = [1]
@@ -64,19 +64,19 @@ def main():
     toSplitFrame = pd.DataFrame(index = modelIndex)
 
     modelResultDf = toSplitFrame.groupby(levelNames).apply(readcsv)
-    toDropLevels = ['alpha', 'C', 'cBase', 'numTrees', 'rangeAtt', 'damp', 'burnTime', 'softId', 'softSubtlety',
+    toDropLevels = ['alpha', 'C', 'cBase', 'actRatio', 'rangeAtt', 'damp', 'burnTime', 'softId', 'softSubtlety',
             'measure', 'attType', 'numSim']
     modelResultDf.index = modelResultDf.index.droplevel(toDropLevels)
     fig = plt.figure()
     numColumns = len(manipulatedVariables['actCost'])
-    numRows = len(manipulatedVariables['actRatio'])
+    numRows = len(manipulatedVariables['numTrees'])
     plotCounter = 1
-    for key, group in modelResultDf.groupby(['actRatio', 'actCost']):
+    for key, group in modelResultDf.groupby(['numTrees', 'actCost']):
         columnNamesAsSubtlety = [precisionToSubtletyDict[precision] for precision in group.columns]
         group.columns = columnNamesAsSubtlety
         group = group.stack()
-        group.index.names = ['minAttDist', 'actCost', 'actRatio', 'chasingSubtlety']
-        group.index = group.index.droplevel(['actCost', 'actRatio'])
+        group.index.names = ['minAttDist', 'actCost', 'numTrees', 'chasingSubtlety']
+        group.index = group.index.droplevel(['actCost', 'numTrees'])
         group = group.to_frame()
         
         group.columns = ['model']
