@@ -79,7 +79,7 @@ class SheepPolicy():
         if timeStep % self.updateFrequency == 0:
             warmUpRate = min(1, timeStep/self.warmUpTimeSteps)
             sheepMaxSpeed = self.startMaxSheepSpeed + (self.endMaxSheepSpeed - self.startMaxSheepSpeed) * warmUpRate
-            dampedSheepVel = oldSheepVel * (1 - self.damp) 
+            dampedSheepVel = oldSheepVel * (1.0 - self.damp) 
             sheepVel = np.array(dampedSheepVel) + np.array(sheepAccer) * int(timeStep > self.burnTime)
             sheepSpeed = np.linalg.norm(sheepVel, ord = 2)
             if sheepSpeed > sheepMaxSpeed:

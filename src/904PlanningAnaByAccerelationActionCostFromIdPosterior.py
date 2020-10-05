@@ -467,8 +467,8 @@ def drawPerformanceline(dataDf, axForDraw):
 def main():     
     manipulatedVariables = OrderedDict()
     manipulatedVariables['alpha'] = [0.25]
-    manipulatedVariables['attType'] = ['idealObserver']#, 'hybrid4']
-    #manipulatedVariables['attType'] = ['hybrid4', 'preAttention']
+    #manipulatedVariables['attType'] = ['idealObserver']#, 'hybrid4']
+    manipulatedVariables['attType'] = ['hybrid4']#, 'preAttention']
     #manipulatedVariables['attType'] = ['preAttention']
     #manipulatedVariables['attType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
     #manipulatedVariables['attType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5']
@@ -478,12 +478,12 @@ def main():
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [4]
     manipulatedVariables['numSim'] = [184]
-    manipulatedVariables['actRatio'] = [0.1, 0.5, 0.9]
+    manipulatedVariables['actRatio'] = [0.1, 0.9, 1.7]
     manipulatedVariables['burnTime'] = [0]
     manipulatedVariables['softId'] = [1]
     manipulatedVariables['softSubtlety'] = [1]
     manipulatedVariables['actCost'] = [0.0, 0.1, 0.5]
-    manipulatedVariables['damp'] = [0.0, 0.15, 0.3]
+    manipulatedVariables['damp'] = [0.0, 0.5, 1.0]
  
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
     parametersAllCondtion = [dict(list(specificValueParameter)) for specificValueParameter in productedValues]
