@@ -483,7 +483,7 @@ def main():
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [4]
     manipulatedVariables['numSim'] = [185]
-    manipulatedVariables['actRatio'] = [0.1, 0.9, 1.7]
+    manipulatedVariables['actRatio'] = [0.1, 0.8, 1.5]
     manipulatedVariables['burnTime'] = [0]
     manipulatedVariables['softId'] = [1]
     manipulatedVariables['softSubtlety'] = [1]
