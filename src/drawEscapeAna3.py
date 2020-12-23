@@ -37,8 +37,8 @@ def main():
     manipulatedVariables['softId'] = [1]
     manipulatedVariables['softSubtlety'] = [1]
     manipulatedVariables['actCost'] = [0.0, 0.1, 0.5]
-    manipulatedVariables['damp'] = [1.0]
-    manipulatedVariables['measure'] = ['identity']
+    manipulatedVariables['damp'] = [0.0]
+    manipulatedVariables['measure'] = ['escape']
 
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
     parametersAllCondtion = [dict(list(specificValueParameter)) for specificValueParameter in productedValues]

@@ -20,7 +20,7 @@ from simple1DEnv import TransitionFunction, RewardFunction, Terminal
 from visualize import draw
 import stochasticAgentsMotionSimulationByAccerelationActionBurnTimeWithDamp as ag
 import Attention
-import calPosterior as calPosterior
+import calPosteriorModifyForIdeal as calPosterior
 import stochasticBeliefAndAttentionSimulationBurnTimeUpdateIdentitySamplePosterior as ba
 import env
 import rewardWithActionCostAndWolfProbability as reward
@@ -70,26 +70,26 @@ class RunMCTSTrjactory:
                 actions = mcts(rootNodes)
                 rootNodesOnTruth = [Node(id={action: currState}, numVisited=0, sumValue=0, is_expanded = False) for _ in range(self.numTree)]
                 actionsOnTruth = np.array([[0, 3.4]]) #mcts(rootNodesOnTruth)
-                #actionSpace = [(np.cos(degreeInPolar), np.sin(degreeInPolar)) for degreeInPolar in np.arange(0, 360, 8)/180 * math.pi] 
+                #actionSpace = [(np.cos(degreeInPolar), np.sin(degreeInPolar)) for degreeInPolar in np.arange(0, 360, 8)/180 * math.pi]
                 #actions = [actionSpace[np.random.choice(range(len(actionSpace)))]]
             action = actions[int(runningStep/self.actionUpdateFrequecy) % self.planFrequency]
             actionOnTruth = actionsOnTruth[int(runningStep/self.actionUpdateFrequecy) % self.planFrequency]
             oppoActionOnTruth = -1 * np.array(actionOnTruth)
-            
+
             physicalState, beliefAndAttention = currState
             hypothesisInformation, positionOldTimeDF = beliefAndAttention
-            probabilityOnHypothesisAttention = np.exp(hypothesisInformation['logP']) 
+            probabilityOnHypothesisAttention = np.exp(hypothesisInformation['logP'])
             posteriorOnHypothesisAttention = probabilityOnHypothesisAttention/probabilityOnHypothesisAttention.sum()
             probabilityOnAttentionSlotByGroupbySum = posteriorOnHypothesisAttention.groupby(['wolfIdentity','sheepIdentity']).sum().values
             posterior = probabilityOnAttentionSlotByGroupbySum/np.sum(probabilityOnAttentionSlotByGroupbySum)
             stateToRecord = [physicalState, posterior]
-            #print(physicalState[1]) 
+            #print(physicalState[1])
             physicalStateOnTruth, beliefAndAttentionOnTruth = currStateOnTruth
             oppoActionPhysicalStateOnTruth, beliefAndAttentionOnTruthOppoAction = oppoActionCurrStateOnTruth
-            
-            trajectory.append([stateToRecord, action, physicalStateOnTruth, oppoActionPhysicalStateOnTruth, 
-                actionOnTruth, [np.array(list(rootNode.id.values())[0])[0][3] for rootNode in rootNodes]]) 
-            
+
+            trajectory.append([stateToRecord, action, physicalStateOnTruth, oppoActionPhysicalStateOnTruth,
+                actionOnTruth, [np.array(list(rootNode.id.values())[0])[0][3] for rootNode in rootNodes]])
+
             currStateOnTruth = copy.deepcopy(currState)
             oppoActionCurrStateOnTruth = copy.deepcopy(currState)
 
@@ -111,9 +111,9 @@ class RunOneCondition:
     def __init__(self, getTrajectorySavePathByCondition, getCSVSavePathByCondition):
         self.getTrajectorySavePathByCondition = getTrajectorySavePathByCondition
         self.getCSVSavePathByCondition = getCSVSavePathByCondition
-    
+
     def __call__(self, condition):
-        
+
         getSavePath = self.getTrajectorySavePathByCondition(condition)
         attentionType = condition['attType']
         alpha = condition['alpha']
@@ -143,7 +143,7 @@ class RunOneCondition:
             meanActionOnConditions = {}
             meanVelDiffOnConditions = {}
             meanEscapeOnConditions = {}
-            for chasingSubtlety in possibleTrialSubtleties: 
+            for chasingSubtlety in possibleTrialSubtleties:
 
                 print(numTree, chasingSubtlety, numSimulations, attentionType)
                 numAgent = 25
@@ -158,18 +158,18 @@ class RunOneCondition:
                 xBoundary = [0, 640]
                 yBoundary = [0, 480]
                 resetAgentPositions = ag.ResetAgentPositions(xBoundary, yBoundary, numAgent, isLegalInitPositions)
-                resetPhysicalState = ag.ResetPhysicalState(sheepId, numAgent, resetAgentPositions, resetWolfIdAndSubtlety) 
-               
+                resetPhysicalState = ag.ResetPhysicalState(sheepId, numAgent, resetAgentPositions, resetWolfIdAndSubtlety)
+
                 numFramePerSecond = 20
-                numMDPTimeStepPerSecond = 5 
+                numMDPTimeStepPerSecond = 5
                 numFrameWithoutActionChange = int(numFramePerSecond/numMDPTimeStepPerSecond)
-                
-                sheepActionUpdateFrequency = 1 
+
+                sheepActionUpdateFrequency = 1
                 minSheepSpeed = int(17.4 * distanceToVisualDegreeRatio/numFramePerSecond)
                 maxSheepSpeed = int(23.2 * distanceToVisualDegreeRatio/numFramePerSecond)
                 warmUpTimeSteps = int(10 * numMDPTimeStepPerSecond)
                 sheepPolicy = ag.SheepPolicy(sheepActionUpdateFrequency, minSheepSpeed, maxSheepSpeed, warmUpTimeSteps, burnTime, damp)
-                
+
                 wolfActionUpdateFrequency = int(0.2 * numMDPTimeStepPerSecond)
                 minWolfSpeed = int(8.7 * distanceToVisualDegreeRatio/numFramePerSecond)
                 maxWolfSpeed = int(14.5 * distanceToVisualDegreeRatio/numFramePerSecond)
@@ -183,9 +183,9 @@ class RunOneCondition:
 
                 xBoundary = [0, 640]
                 yBoundary = [0, 480]
-                checkBoundaryAndAdjust = ag.CheckBoundaryAndAdjust(xBoundary, yBoundary) 
+                checkBoundaryAndAdjust = ag.CheckBoundaryAndAdjust(xBoundary, yBoundary)
                 transiteMultiAgentMotion = ag.TransiteMultiAgentMotion(checkBoundaryAndAdjust)
-               
+
                 minDistance = 2.5 * distanceToVisualDegreeRatio
                 isTerminal = env.IsTerminal(sheepId, minDistance)
                # screen = pg.display.set_mode([xBoundary[1], yBoundary[1]])
@@ -198,10 +198,10 @@ class RunOneCondition:
                # render = env.Render(numAgent, screen, xBoundary[1], yBoundary[1], screenColor, sheepColor, wolfColor, circleSize, saveImage, saveImageFile, isTerminal)
                 render = None
                 renderOnInSimulation = False
-                transiteStateWithoutActionChangeInSimulation = env.TransiteStateWithoutActionChange(numFrameWithoutActionChange, isTerminal, transiteMultiAgentMotion, render, renderOnInSimulation)     
+                transiteStateWithoutActionChangeInSimulation = env.TransiteStateWithoutActionChange(numFrameWithoutActionChange, isTerminal, transiteMultiAgentMotion, render, renderOnInSimulation)
                 renderOnInPlay = False
-                transiteStateWithoutActionChangeInPlay = env.TransiteStateWithoutActionChange(numFrameWithoutActionChange, isTerminal, transiteMultiAgentMotion, render, renderOnInPlay)     
-               
+                transiteStateWithoutActionChangeInPlay = env.TransiteStateWithoutActionChange(numFrameWithoutActionChange, isTerminal, transiteMultiAgentMotion, render, renderOnInPlay)
+
                 if attentionType == 'idealObserver':
                     attentionLimitation= 1
                     precisionPerSlot=500.0
@@ -238,8 +238,8 @@ class RunOneCondition:
                     precisionForUntracked=2.5
                     memoryratePerSlot=0.7
                     memoryrateForUntracked=0.45
-                
-                
+
+
                 if attentionType == 'preAttentionMem0.25':
                     attentionLimitation= 1
                     precisionPerSlot=2.5
@@ -265,21 +265,21 @@ class RunOneCondition:
                     memoryratePerSlot=0.45
                     memoryrateForUntracked=0.45
 
-                attention = Attention.AttentionToPrecisionAndDecay(precisionPerSlot, precisionForUntracked, memoryratePerSlot, memoryrateForUntracked)    
+                attention = Attention.AttentionToPrecisionAndDecay(precisionPerSlot, precisionForUntracked, memoryratePerSlot, memoryrateForUntracked)
                 transferMultiAgentStatesToPositionDF = ba.TransferMultiAgentStatesToPositionDF(numAgent)
                 possibleSubtleties = [500.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.01]
                 resetBeliefAndAttention = ba.ResetBeliefAndAttention(sheepId, suspectorIds, possibleSubtleties, attentionLimitation, transferMultiAgentStatesToPositionDF, attention)
-               
+
                 maxAttentionDistance = minAttentionDistance + rangeAttention
                 attentionMinDistance = minAttentionDistance * distanceToVisualDegreeRatio
                 attentionMaxDistance = maxAttentionDistance * distanceToVisualDegreeRatio
                 numStandardErrorInDistanceRange = 4
                 calDistancePriorOnAttentionSlot = Attention.CalDistancePriorOnAttentionSlot(attentionMinDistance, attentionMaxDistance, numStandardErrorInDistanceRange)
-                attentionSwitch = Attention.AttentionSwitch(attentionLimitation, calDistancePriorOnAttentionSlot)    
+                attentionSwitch = Attention.AttentionSwitch(attentionLimitation, calDistancePriorOnAttentionSlot)
                 computePosterior = calPosterior.CalPosteriorLog(minDistance)
 
                 print(attentionLimitation, attentionMinDistance/distanceToVisualDegreeRatio, attentionMaxDistance/distanceToVisualDegreeRatio)
-                
+
                 attentionSwitchFrequencyInSimulation = np.inf
                 beliefUpdateFrequencyInSimulation = np.inf
                 updateBeliefAndAttentionInSimulation = ba.UpdateBeliefAndAttentionState(attention, computePosterior, attentionSwitch, transferMultiAgentStatesToPositionDF,
@@ -287,7 +287,7 @@ class RunOneCondition:
 
                 attentionSwitchFrequencyInPlay = int(0.2 * numMDPTimeStepPerSecond)
                 beliefUpdateFrequencyInPlay = int(0.2 * numMDPTimeStepPerSecond)
-                updateBeliefAndAttentionInPlay = ba.UpdateBeliefAndAttentionState(attention, computePosterior, attentionSwitch, transferMultiAgentStatesToPositionDF, 
+                updateBeliefAndAttentionInPlay = ba.UpdateBeliefAndAttentionState(attention, computePosterior, attentionSwitch, transferMultiAgentStatesToPositionDF,
                         attentionSwitchFrequencyInPlay, beliefUpdateFrequencyInPlay, burnTime)
 
                 updatePhysicalStateByBeliefFrequencyInSimulationRoot = int(0.2 * numMDPTimeStepPerSecond)
@@ -299,53 +299,53 @@ class RunOneCondition:
                 #updatePhysicalStateByBeliefInSimulation = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInSimulation,
                 #        softParaForIdentity, softParaForSubtlety)
                 updatePhysicalStateByBeliefInSimulation = lambda state: state
-                
+
                 updatePhysicalStateByBeliefFrequencyInPlay = np.inf
                 #updatePhysicalStateByBeliefInPlay = ba.UpdatePhysicalStateImagedByBelief(updatePhysicalStateByBeliefFrequencyInPlay,
                 #        softParaForIdentity, softParaForSubtlety)
                 updatePhysicalStateByBeliefInPlay = lambda state: state
 
-                transitionFunctionInSimulation = env.TransitionFunction(resetPhysicalState, resetBeliefAndAttention, updatePhysicalState, transiteStateWithoutActionChangeInSimulation, 
+                transitionFunctionInSimulation = env.TransitionFunction(resetPhysicalState, resetBeliefAndAttention, updatePhysicalState, transiteStateWithoutActionChangeInSimulation,
                         updateBeliefAndAttentionInSimulation, updatePhysicalStateByBeliefInSimulation)
 
-                transitionFunctionInPlay = env.TransitionFunction(resetPhysicalState, resetBeliefAndAttention, updatePhysicalState, transiteStateWithoutActionChangeInPlay, 
+                transitionFunctionInPlay = env.TransitionFunction(resetPhysicalState, resetBeliefAndAttention, updatePhysicalState, transiteStateWithoutActionChangeInPlay,
                         updateBeliefAndAttentionInPlay, updatePhysicalStateByBeliefInPlay)
-                
+
                 numActionSpace = 4
                 actionInterval = int(360/(numActionSpace))
                 actionMagnitude = actionRatio * minSheepSpeed * numFramePerSecond
-                actionSpaceFull = [(np.cos(degreeInPolar) * actionMagnitude, np.sin(degreeInPolar) * actionMagnitude) 
-                        for degreeInPolar in np.arange(0, 360, actionInterval)/180 * math.pi] 
-                actionSpaceHalf = [(np.cos(degreeInPolar) * actionMagnitude * 0.5, np.sin(degreeInPolar) * actionMagnitude * 0.5) 
-                        for degreeInPolar in np.arange(0, 360, actionInterval)/180 * math.pi] 
+                actionSpaceFull = [(np.cos(degreeInPolar) * actionMagnitude, np.sin(degreeInPolar) * actionMagnitude)
+                        for degreeInPolar in np.arange(0, 360, actionInterval)/180 * math.pi]
+                actionSpaceHalf = [(np.cos(degreeInPolar) * actionMagnitude * 0.5, np.sin(degreeInPolar) * actionMagnitude * 0.5)
+                        for degreeInPolar in np.arange(0, 360, actionInterval)/180 * math.pi]
                 actionSpace = [(0, 0)] + actionSpaceFull + actionSpaceHalf
                 getActionPrior = lambda state : {action: 1/len(actionSpace) for action in actionSpace}
 
                 maxRollOutSteps = 5
                 aliveBouns = 1/maxRollOutSteps
                 deathPenalty = -1
-                rewardFunction = reward.RewardFunctionTerminalPenalty(sheepId, aliveBouns, actionCost, deathPenalty, isTerminal, actionSpace)  
-                rewardRollout = lambda state, action, nextState: rewardFunction(state, action) 
+                rewardFunction = reward.RewardFunctionTerminalPenalty(sheepId, aliveBouns, actionCost, deathPenalty, isTerminal, actionSpace)
+                rewardRollout = lambda state, action, nextState: rewardFunction(state, action)
 
                 cInit = 1
                 #cBase = 50
                 scoreChild = ScoreChild(cInit, cBase)
                 selectAction = SelectAction(scoreChild)
                 selectNextState = SelectNextState(selectAction)
-                
+
                 initializeChildren = InitializeChildren(actionSpace, transitionFunctionInSimulation, getActionPrior)
                 expand = Expand(isTerminal, initializeChildren)
                 pWidening = PWidening(alpha, C)
                 expandNewState = ExpandNextState(transitionFunctionInSimulation, pWidening)
-                
+
                 rolloutPolicy = lambda state: actionSpace[np.random.choice(range(numActionSpace))]
                 rolloutHeuristic = lambda state: 0
                 estimateValue = RollOut(rolloutPolicy, maxRollOutSteps, transitionFunctionInSimulation, rewardRollout, isTerminal, rolloutHeuristic)
-               
+
                 numActionPlaned = 1
                 outputAction = OutputAction(numActionPlaned, actionSpace)
                 #numSimulations = int(numTotalSimulationTimes/numTree)
-                
+
                 #sheepColorInMcts = np.array([0, 255, 0])
                 #wolfColorInMcts = np.array([255, 0, 0])
                 #distractorColorInMcts = np.array([255, 255, 255])
@@ -356,7 +356,7 @@ class RunOneCondition:
                 #pg.init()
                 #mcts = MCTS(numSimulations, selectChild, expand, rollout, backup, selectAction, mctsRender, mctsRenderOn)
                 pwMultipleTrees = PWMultipleTrees(numSimulations, selectAction, selectNextState, expand, expandNewState, estimateValue, backup, outputAction)
-                
+
                 maxRunningSteps = int(25 * numMDPTimeStepPerSecond)
                 makeDiffSimulationRoot = MakeDiffSimulationRoot(isTerminal, updatePhysicalStateByBeliefInSimulationRoot, reUpdatePhysicalStateByBeliefInSimulationRoot)
                 runMCTSTrjactory = RunMCTSTrjactory(maxRunningSteps, numTree, numActionPlaned, sheepActionUpdateFrequency, transitionFunctionInPlay, isTerminal, makeDiffSimulationRoot, render)
@@ -364,11 +364,11 @@ class RunOneCondition:
                 rootAction = actionSpace[np.random.choice(range(numActionSpace))]
                 numTrial = 10
                 trajectories = [runMCTSTrjactory(pwMultipleTrees) for trial in range(numTrial)]
-               
+
                 savePath = getSavePath({'chasingSubtlety': chasingSubtlety, 'subIndex': subIndex})
                 tsl.saveToPickle(trajectories, savePath)
                 getCSVSavePath = self.getCSVSavePathByCondition(condition)
-                
+
                 startStatsIndex = 1
                 def getTrueWolfIdAcc(trajectory):
                     AccTrial = []
@@ -384,7 +384,7 @@ class RunOneCondition:
                     return meanAcc
                 meanIdentiy = np.mean([getTrueWolfIdAcc(trajectory) for trajectory in trajectories])
                 meanIdentiyOnConditions.update({chasingSubtlety: meanIdentiy})
-                
+
                 def getTrueWolfIdSubtletyAcc(trajectory):
                     AccTrial = []
                     for timeStepIndex in range(len(trajectory) - 2):
@@ -399,7 +399,7 @@ class RunOneCondition:
                     return meanAcc
                 meanPerception = np.mean([getTrueWolfIdSubtletyAcc(trajectory) for trajectory in trajectories])
                 meanPerceptionOnConditions.update({chasingSubtlety: meanPerception})
-                
+
                 def getActionDeviationLevel(trajectory):
                     AccTrial = []
                     for timeStepIndex in range(len(trajectory) - 2):
@@ -413,7 +413,7 @@ class RunOneCondition:
                     return meanAcc
                 meanAction = np.mean([getActionDeviationLevel(trajectory) for trajectory in trajectories])
                 meanActionOnConditions.update({chasingSubtlety: meanAction})
-                
+
                 def getVelocityDiff(trajectory):
                     AccTrial = []
                     for timeStepIndex in range(len(trajectory) - 2):
@@ -424,67 +424,67 @@ class RunOneCondition:
                         if timeStepIndex >= startStatsIndex:
                             velDiffNormWithActionOnTruth = np.linalg.norm((velReal - velWithActionOnTruth))
                             velDiffNormWithActionOppo = np.linalg.norm((velReal - velWithActionOppo))
-                            velDiffRatio = 1.0 * velDiffNormWithActionOnTruth / velDiffNormWithActionOppo 
+                            velDiffRatio = 1.0 * velDiffNormWithActionOnTruth / velDiffNormWithActionOppo
                             AccTrial.append(velDiffRatio)
                     meanAcc = np.mean(AccTrial)
                     return meanAcc
                 meanVelDiff = np.mean([getVelocityDiff(trajectory) for trajectory in trajectories])
                 meanVelDiffOnConditions.update({chasingSubtlety: meanVelDiff})
-            
+
                 getEscapeAcc = lambda trajectory: int(len(trajectory) >= (maxRunningSteps - 2))
                 meanEscape = np.mean([getEscapeAcc(trajectory) for trajectory in trajectories])
                 meanEscapeOnConditions.update({chasingSubtlety: meanEscape})
-            
+
             allResults.append(meanEscapeOnConditions)
             results = pd.DataFrame(allResults)
             escapeCSVSavePath = getCSVSavePath({'measure': 'escape'})
             results.to_csv(escapeCSVSavePath)
-            
+
             allIdentityResults.append(meanIdentiyOnConditions)
             identityResults = pd.DataFrame(allIdentityResults)
             identityCSVSavePath = getCSVSavePath({'measure': 'identity'})
             identityResults.to_csv(identityCSVSavePath)
-            
+
             allPerceptionResults.append(meanPerceptionOnConditions)
             perceptionResults = pd.DataFrame(allPerceptionResults)
             perceptionCSVSavePath = getCSVSavePath({'measure': 'percetion'})
             perceptionResults.to_csv(perceptionCSVSavePath)
-             
+
             allActionResults.append(meanActionOnConditions)
             actionResults = pd.DataFrame(allActionResults)
             actionCSVSavePath = getCSVSavePath({'measure': 'action'})
             actionResults.to_csv(actionCSVSavePath)
-            
+
             allVelDiffResults.append(meanVelDiffOnConditions)
             velDiffResults = pd.DataFrame(allVelDiffResults)
             velDiffCSVSavePath = getCSVSavePath({'measure': 'velDiff'})
             velDiffResults.to_csv(velDiffCSVSavePath)
 
 def drawPerformanceline(dataDf, axForDraw):
-    plotDf = dataDf.reset_index() 
+    plotDf = dataDf.reset_index()
     plotDf.plot(x = "subtleties", y = "escapeRate", ax = axForDraw)
 
-def main():     
+def main():
     manipulatedVariables = OrderedDict()
     manipulatedVariables['alpha'] = [0.25]
-    #manipulatedVariables['attType'] = ['idealObserver']#, 'hybrid4']
-    manipulatedVariables['attType'] = ['hybrid4']#, 'preAttention']
+    #manipulatedVariables['attType'] = ['idealObserver', 'hybrid4']
+    #manipulatedVariables['attType'] = ['hybrid4']#, 'preAttention']
     #manipulatedVariables['attType'] = ['preAttention']
-    #manipulatedVariables['attType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
+    manipulatedVariables['attType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
     #manipulatedVariables['attType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5']
     manipulatedVariables['C'] = [2]
     manipulatedVariables['minAttDist'] = [10.0, 40.0]#[10.0, 20.0, 40.0]
     manipulatedVariables['rangeAtt'] = [10.0]
     manipulatedVariables['cBase'] = [50]
-    manipulatedVariables['numTrees'] = [4]
-    manipulatedVariables['numSim'] = [184]
-    manipulatedVariables['actRatio'] = [0.1, 0.8, 1.5]
+    manipulatedVariables['numTrees'] = [2]
+    manipulatedVariables['numSim'] = [154]
+    manipulatedVariables['actRatio'] = [1.0]
     manipulatedVariables['burnTime'] = [0]
     manipulatedVariables['softId'] = [1]
     manipulatedVariables['softSubtlety'] = [1]
-    manipulatedVariables['actCost'] = [0.0, 0.1, 0.5]
-    manipulatedVariables['damp'] = [0.0, 0.5, 1.0]
- 
+    manipulatedVariables['actCost'] = [0.1, 0.4, 0.7, 1.0]
+    manipulatedVariables['damp'] = [0.0, 1.0]
+
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
     parametersAllCondtion = [dict(list(specificValueParameter)) for specificValueParameter in productedValues]
 
@@ -505,9 +505,9 @@ def main():
     numCpuToUse = int(numCpuCores)
     runPool = mp.Pool(numCpuToUse)
     runPool.map(runOneCondition, parametersAllCondtion)
-   
+
     precisionToSubtletyDict={500:0,50:5,11:30,3.3:60,1.83:90,0.92:120,0.31:150,0.001: 180}
-    
+
     #levelValues = [numTotalSimulationTimes, numTrees, subtleties]
     #levelNames = ["numTotalSimulationTimes", "numTrees", "subtleties"]
 
@@ -533,4 +533,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
+
