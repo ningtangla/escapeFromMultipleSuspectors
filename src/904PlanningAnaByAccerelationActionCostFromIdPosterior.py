@@ -136,7 +136,7 @@ class RunOneCondition:
         allActionResults = []
         allVelDiffResults = []
         allResults = []
-        possibleTrialSubtleties = [0.92, 0.01]
+        possibleTrialSubtleties = [500.0, 3.3, 0.92, 0.01]
         for subIndex in range(numSub):
             meanIdentiyOnConditions = {}
             meanPerceptionOnConditions = {}

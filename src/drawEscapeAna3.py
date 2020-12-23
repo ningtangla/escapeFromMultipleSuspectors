@@ -18,7 +18,7 @@ class Readcsv:
         mean = results.mean()
         return mean
 
-def main():     
+def main():
     manipulatedVariables = OrderedDict()
     manipulatedVariables['alpha'] = [0.25]
     #manipulatedVariables['attType'] = ['idealObserver']#, 'hybrid4']
@@ -27,19 +27,19 @@ def main():
     #manipulatedVariables['attType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
     #manipulatedVariables['attType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5']
     manipulatedVariables['C'] = [2]
-    manipulatedVariables['minAttDist'] = [10.0]#[10.0, 20.0, 40.0]
+    manipulatedVariables['minAttDist'] = [10.0, 40.0]#[10.0, 20.0, 40.0]
     manipulatedVariables['rangeAtt'] = [10.0]
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [4]
-    manipulatedVariables['numSim'] = [185]
-    manipulatedVariables['actRatio'] = [0.1, 0.5, 0.9]
+    manipulatedVariables['numSim'] = [184]
+    manipulatedVariables['actRatio'] = [0.1, 0.8, 1.5]
     manipulatedVariables['burnTime'] = [0]
     manipulatedVariables['softId'] = [1]
     manipulatedVariables['softSubtlety'] = [1]
     manipulatedVariables['actCost'] = [0.0, 0.1, 0.5]
-    manipulatedVariables['damp'] = [0.0]
-    manipulatedVariables['measure'] = ['escape']
- 
+    manipulatedVariables['damp'] = [1.0]
+    manipulatedVariables['measure'] = ['identity']
+
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
     parametersAllCondtion = [dict(list(specificValueParameter)) for specificValueParameter in productedValues]
 
@@ -57,7 +57,7 @@ def main():
     readcsv = Readcsv(getCSVSavePathByCondition, columnNames)
 
     precisionToSubtletyDict={500.0:0, 50.0:5, 11.0:30, 3.3:60, 1.83:90, 0.92:120, 0.31:150, 0.01: 180}
-    
+
     levelNames = list(manipulatedVariables.keys())
     levelValues = list(manipulatedVariables.values())
     modelIndex = pd.MultiIndex.from_product(levelValues, names=levelNames)
@@ -78,12 +78,12 @@ def main():
         group.index.names = ['minAttDist', 'actCost', 'actRatio', 'chasingSubtlety']
         group.index = group.index.droplevel(['actCost', 'actRatio'])
         group = group.to_frame()
-        
+
         group.columns = ['model']
         axForDraw = fig.add_subplot(numRows, numColumns, plotCounter)
         if (plotCounter) % max(numColumns, 2) == 1:
             axForDraw.set_ylabel(str(key[0]))
-        
+
         if plotCounter <= numColumns:
             axForDraw.set_title(str(key[1]))
         for attentionType, grp in group.groupby('minAttDist'):
@@ -93,7 +93,7 @@ def main():
             #    grp['human'] = [0.6, 0.48, 0.37, 0.25, 0.24, 0.42, 0.51]
             #    grp.plot.line(ax = axForDraw, y = 'human', label = 'human', ylim = (0, 0.7), marker = 'o', rot = 0 )
             grp.plot.line(ax = axForDraw, y = 'model', label = str(attentionType), ylim = (0, 1.1), marker = 'o', rot = 0 )
-       
+
         plotCounter = plotCounter + 1
 
     #plt.suptitle('Measurement = Perception Rate')

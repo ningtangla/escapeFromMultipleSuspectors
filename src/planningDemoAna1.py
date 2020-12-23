@@ -31,14 +31,14 @@ def main():
                                     'trajectories')
     if not os.path.exists(trajectoryDirectory):
         os.makedirs(trajectoryDirectory)
-    
+
     alphaForStateWidening = 0.25
     CForStateWidening = 2
     cBase = 50
-    numTrees = 2
-    numSimulationTimes = 5
-    damp = 0.0
-    actionCost = 0.0
+    numTrees = 4
+    numSimulationTimes = 184
+    damp = 1.0
+    actionCost = 0.5
     trajectoryFixedParameters = {'alpha': alphaForStateWidening, 'C': CForStateWidening, 'damp': damp, 'actCost': actionCost,
             'cBase': cBase, 'numTrees': numTrees, 'numSim': numSimulationTimes}
     trajectoryExtension = '.pickle'
@@ -46,22 +46,22 @@ def main():
 
     # Compute Statistics on the Trajectories
     loadTrajectories = LoadTrajectories(getTrajectorySavePath, loadFromPickle)
-    minAttentionDistance = 10.0
+    minAttentionDistance = 40.0
     rangeAttention = 10.0
-    actionRatio = 0.05
+    actionRatio = 1.5
     burnTime = 0
     softId = 1
     softSubtlety = 1
-    trajectoryParameters = {'minAttDist': minAttentionDistance, 'rangeAtt': rangeAttention, 'actRatio': actionRatio, 
+    trajectoryParameters = {'minAttDist': minAttentionDistance, 'rangeAtt': rangeAttention, 'actRatio': actionRatio,
             'burnTime': burnTime, 'softId': softId, 'softSubtlety': softSubtlety}
-    chasingSubtlety = 0.92
-    subIndex = 3
-    attentionType = 'idealObserver'
+    chasingSubtlety = 0.01
+    subIndex = 0
+    #attentionType = 'idealObserver'
     #attentionType = 'preAttention'
-    #attentionType = 'hybrid4'
+    attentionType = 'hybrid4'
     trajectoryParameters.update({'chasingSubtlety': chasingSubtlety, 'subIndex': subIndex, 'attType': attentionType})
 
-    trajectories = loadTrajectories(trajectoryParameters) 
+    trajectories = loadTrajectories(trajectoryParameters)
     # generate demo image
     screenWidth = 640
     screenHeight = 480
@@ -72,7 +72,7 @@ def main():
     lineColor = THECOLORS['white']
     lineWidth = 4
     drawBackground = DrawBackground(screen, screenColor, xBoundary, yBoundary, lineColor, lineWidth)
-    
+
     FPS = 1
     numSheep = 1
     numWolves = 24
@@ -89,16 +89,16 @@ def main():
     if not os.path.exists(saveImageDir):
         os.makedirs(saveImageDir)
     updateColorSpaceByPosterior = updateColorSpace
-    
+
     #updateColorSpaceByPosterior = lambda originalColorSpace, posterior : originalColorSpace
     outsideCircleAgentIds = list(range(1, numSheep + numWolves))
     outsideCircleColor = np.array([[255, 255, 255]] * numWolves)
-    outsideCircleSize = 1 
+    outsideCircleSize = 1
     drawCircleOutside = DrawCircleOutside(screen, outsideCircleAgentIds, positionIndex, outsideCircleColor, outsideCircleSize)
-    drawState = DrawState(FPS, screen, circleColorSpace, circleSize, agentIdsToDraw, positionIndex, 
+    drawState = DrawState(FPS, screen, circleColorSpace, circleSize, agentIdsToDraw, positionIndex,
             saveImage, saveImageDir, drawBackground, updateColorSpaceByPosterior, drawCircleOutside)
-    
-    drawPlanningAna = DrawPlanningAna(FPS, screen, circleColorSpace, circleSize, agentIdsToDraw, positionIndex, 
+
+    drawPlanningAna = DrawPlanningAna(FPS, screen, circleColorSpace, circleSize, agentIdsToDraw, positionIndex,
             saveImage, saveImageDir, drawBackground, updateColorSpaceByPosterior, drawCircleOutside)
    # MDP Env
     xBoundary = [0,640]
@@ -107,13 +107,13 @@ def main():
     #transiteInDemo = TransiteMultiAgentMotion(checkBoundaryAndAdjust)
     numFramesToInterpolate = int(FPS/5 - 1)
     interpolateState = InterpolateState(numFramesToInterpolate)
-    
+
     stateIndexInTimeStep = 0
     actionIndexInTimeStep = 1
     posteriorIndexInTimeStep = 4
-    chaseTrial = ChaseTrialWithTraj(stateIndexInTimeStep, drawState, interpolateState, 
+    chaseTrial = ChaseTrialWithTraj(stateIndexInTimeStep, drawState, interpolateState,
             actionIndexInTimeStep, posteriorIndexInTimeStep, drawPlanningAna)
-    
+
     print(len(trajectories))
     lens = [len(trajectory) for trajectory in trajectories]
     index = np.argsort(np.array(lens))
