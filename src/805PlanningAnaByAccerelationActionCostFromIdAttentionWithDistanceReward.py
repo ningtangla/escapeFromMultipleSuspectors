@@ -23,7 +23,7 @@ import Attention
 import calPosterior as calPosterior
 import stochasticBeliefAndAttentionSimulationBurnTimeUpdateIdentitySampleAttention as ba
 import env
-import rewardWithActionCostAndWolfProbability as reward
+import rewardWithActionCostAndDistanceProbability as reward
 import trajectoriesSaveLoad as tsl
 import AnalyticGeometryFunctions as agf
 
@@ -139,7 +139,7 @@ class RunOneCondition:
         allActionResults = []
         allVelDiffResults = []
         allResults = []
-        possibleTrialSubtleties = [0.92, 0.01]#[500.0, 3.3, 1.83, 0.92, 0.01]
+        possibleTrialSubtleties = [0.01]#[500.0, 3.3, 1.83, 0.92, 0.01]
         for subIndex in range(numSub):
             meanIdentiyOnConditions = {}
             meanPerceptionOnConditions = {}
@@ -288,8 +288,8 @@ class RunOneCondition:
                 updateBeliefAndAttentionInSimulation = ba.UpdateBeliefAndAttentionState(attention, computePosterior, attentionSwitch, transferMultiAgentStatesToPositionDF,
                         attentionSwitchFrequencyInSimulation, beliefUpdateFrequencyInSimulation, burnTime)
 
-                attentionSwitchFrequencyInPlay = int(0.2 * numMDPTimeStepPerSecond)
-                beliefUpdateFrequencyInPlay = int(0.2 * numMDPTimeStepPerSecond)
+                attentionSwitchFrequencyInPlay = int(0.6 * numMDPTimeStepPerSecond)
+                beliefUpdateFrequencyInPlay = int(0.6 * numMDPTimeStepPerSecond)
                 updateBeliefAndAttentionInPlay = ba.UpdateBeliefAndAttentionState(attention, computePosterior, attentionSwitch, transferMultiAgentStatesToPositionDF,
                         attentionSwitchFrequencyInPlay, beliefUpdateFrequencyInPlay, burnTime)
 
@@ -314,14 +314,14 @@ class RunOneCondition:
                 transitionFunctionInPlay = env.TransitionFunction(resetPhysicalState, resetBeliefAndAttention, updatePhysicalState, transiteStateWithoutActionChangeInPlay,
                         updateBeliefAndAttentionInPlay, updatePhysicalStateByBeliefInPlay)
 
-                numActionSpace = 4
+                numActionSpace = 8
                 actionInterval = int(360/(numActionSpace))
                 actionMagnitude = actionRatio * minSheepSpeed * numFramePerSecond
                 actionSpaceFull = [(np.cos(degreeInPolar) * actionMagnitude, np.sin(degreeInPolar) * actionMagnitude)
                         for degreeInPolar in np.arange(0, 360, actionInterval)/180 * math.pi]
                 actionSpaceHalf = [(np.cos(degreeInPolar) * actionMagnitude * 0.5, np.sin(degreeInPolar) * actionMagnitude * 0.5)
                         for degreeInPolar in np.arange(0, 360, actionInterval)/180 * math.pi]
-                actionSpace = [(0, 0)] + actionSpaceFull + actionSpaceHalf
+                actionSpace = [(0, 0)] + actionSpaceFull# + actionSpaceHalf
                 getActionPrior = lambda state : {action: 1/len(actionSpace) for action in actionSpace}
 
                 maxRollOutSteps = 5
@@ -472,23 +472,23 @@ def drawPerformanceline(dataDf, axForDraw):
 def main():
     manipulatedVariables = OrderedDict()
     manipulatedVariables['alpha'] = [0.25]
-    #manipulatedVariables['attType'] = ['idealObserver']#, 'hybrid4']
-    manipulatedVariables['attType'] = ['hybrid4']#, 'preAttention']
+    manipulatedVariables['attType'] = ['idealObserver', 'hybrid4']
+    #manipulatedVariables['attType'] = ['hybrid4']#, 'preAttention']
     #manipulatedVariables['attType'] = ['preAttention']
     #manipulatedVariables['attType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
     #manipulatedVariables['attType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5']
     manipulatedVariables['C'] = [2]
-    manipulatedVariables['minAttDist'] = [10.0, 40.0]#[10.0, 20.0, 40.0]
-    manipulatedVariables['rangeAtt'] = [10.0]
+    manipulatedVariables['minAttDist'] = [5.0, 10.0, 20.0, 40.0]
+    manipulatedVariables['rangeAtt'] = [5.0, 20.0]
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [4]
-    manipulatedVariables['numSim'] = [185]
-    manipulatedVariables['actRatio'] = [0.1, 0.8, 1.5]
+    manipulatedVariables['numSim'] = [165]
+    manipulatedVariables['actRatio'] = [1.0]
     manipulatedVariables['burnTime'] = [0]
-    manipulatedVariables['softId'] = [1]
-    manipulatedVariables['softSubtlety'] = [1]
-    manipulatedVariables['actCost'] = [0.0, 0.1, 0.5]
-    manipulatedVariables['damp'] = [0.0, 0.5, 1.0]
+    manipulatedVariables['softId'] = [1.0]
+    manipulatedVariables['softSubtlety'] = [1.0]
+    manipulatedVariables['actCost'] = [0.0, 0.1, 0.2, 1.0]
+    manipulatedVariables['damp'] = [1.0]
 
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
     parametersAllCondtion = [dict(list(specificValueParameter)) for specificValueParameter in productedValues]

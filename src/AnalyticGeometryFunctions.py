@@ -14,7 +14,7 @@ def computeAngleBetweenVectors(vector1, vector2):
     else:
         innerProduct = vectoriseInnerProduct
         normProduct = np.linalg.norm(vector1) * np.linalg.norm(vector2)
-    angle = np.arccos(innerProduct / normProduct)
+    angle = np.arccos(innerProduct / (normProduct + 1e-100))
     return angle
 
 def computeVectorNorm(vector):

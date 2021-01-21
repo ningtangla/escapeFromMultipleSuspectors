@@ -27,15 +27,15 @@ def main():
     #manipulatedVariables['attType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
     #manipulatedVariables['attType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5']
     manipulatedVariables['C'] = [2]
-    manipulatedVariables['minAttDist'] = [10.0, 20.0, 40.0]
-    manipulatedVariables['rangeAtt'] = [10.0]
+    manipulatedVariables['minAttDist'] = [5.0, 10.0, 20.0, 40.0]
+    manipulatedVariables['rangeAtt'] = [5.0, 20.0]
     manipulatedVariables['cBase'] = [50]
-    manipulatedVariables['numTrees'] = [4]
-    manipulatedVariables['numSim'] = [184]
-    manipulatedVariables['actRatio'] = [0.5, 1.0]
+    manipulatedVariables['numTrees'] = [2]
+    manipulatedVariables['numSim'] = [164]
+    manipulatedVariables['actRatio'] = [1.0]
     manipulatedVariables['burnTime'] = [0]
-    manipulatedVariables['softId'] = [1]
-    manipulatedVariables['softSubtlety'] = [1]
+    manipulatedVariables['softId'] = [1.0]
+    manipulatedVariables['softSubtlety'] = [1.0]
     manipulatedVariables['actCost'] = [0.0, 0.01, 0.1, 1.0]
     manipulatedVariables['damp'] = [1.0]
     manipulatedVariables['measure'] = ['escape']
@@ -53,7 +53,7 @@ def main():
     getCSVSavePathByCondition = lambda condition: tsl.GetSavePath(trajectoryDirectory, measurementEscapeExtension, condition)
     #columnNames = [500.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001]
     #columnNames = [500.0, 3.3, 0.92]
-    columnNames = [0.92, 0.01]
+    columnNames = [0.01]
     readcsv = Readcsv(getCSVSavePathByCondition, columnNames)
 
     precisionToSubtletyDict={500.0:0, 50.0:5, 11.0:30, 3.3:60, 1.83:90, 0.92:120, 0.31:150, 0.01: 180}
@@ -64,19 +64,19 @@ def main():
     toSplitFrame = pd.DataFrame(index = modelIndex)
 
     modelResultDf = toSplitFrame.groupby(levelNames).apply(readcsv)
-    toDropLevels = ['alpha', 'C', 'cBase', 'numTrees', 'rangeAtt', 'damp', 'burnTime', 'softId', 'softSubtlety',
+    toDropLevels = ['alpha', 'C', 'cBase', 'numTrees', 'actRatio', 'damp', 'burnTime', 'softId', 'softSubtlety',
             'measure', 'attType', 'numSim']
     modelResultDf.index = modelResultDf.index.droplevel(toDropLevels)
     fig = plt.figure()
     numColumns = len(manipulatedVariables['actCost'])
-    numRows = len(manipulatedVariables['actRatio'])
+    numRows = len(manipulatedVariables['rangeAtt'])
     plotCounter = 1
-    for key, group in modelResultDf.groupby(['actRatio', 'actCost']):
+    for key, group in modelResultDf.groupby(['rangeAtt', 'actCost']):
         columnNamesAsSubtlety = [precisionToSubtletyDict[precision] for precision in group.columns]
         group.columns = columnNamesAsSubtlety
         group = group.stack()
-        group.index.names = ['minAttDist', 'actCost', 'actRatio', 'chasingSubtlety']
-        group.index = group.index.droplevel(['actCost', 'actRatio'])
+        group.index.names = ['minAttDist', 'actCost', 'rangeAtt', 'chasingSubtlety']
+        group.index = group.index.droplevel(['actCost', 'rangeAtt'])
         group = group.to_frame()
 
         group.columns = ['model']
@@ -102,8 +102,8 @@ def main():
     plt.suptitle('Measurement = Escape rate')
     fig.text(x = 0.5, y = 0.92, s = 'Action Cost', ha = 'center', va = 'center')
     #fig.text(x = 0.5, y = 0.92, s = 'Min Attention Distance', ha = 'center', va = 'center')
-    #fig.text(x = 0.05, y = 0.5, s = 'Attention Range', ha = 'center', va = 'center', rotation=90)
-    fig.text(x = 0.05, y = 0.5, s = 'Action Ratio', ha = 'center', va = 'center', rotation=90)
+    fig.text(x = 0.05, y = 0.5, s = 'Attention Range', ha = 'center', va = 'center', rotation=90)
+    #fig.text(x = 0.05, y = 0.5, s = 'Action Ratio', ha = 'center', va = 'center', rotation=90)
     plt.show()
 
 if __name__ == "__main__":

@@ -12,15 +12,15 @@ class RewardFunctionTerminalPenalty():
     def __call__(self, state, action):
         reward = self.aliveBouns
         if self.isTerminal(state):
-            physicalState, beliefAndAttention = state 
+            physicalState, beliefAndAttention = state
             agentStates, agentActions, timeStep, wolfIdAndSubtlety = physicalState
-            
+
             hypothesisInformation, positionOldTimeDF = beliefAndAttention
             posteriorOnIdentity = hypothesisInformation['identitySoftenProb'].groupby(['wolfIdentity']).mean().values
-            wolfProb = posteriorOnIdentity[wolfIdAndSubtlety[0] - 1] 
+            wolfProb = posteriorOnIdentity[wolfIdAndSubtlety[0] - 1]
             #print(wolfProb)
             reward = reward + self.deathPenalty * min(1.0, 1.0 * wolfProb)
 
         cost = self.actionCost * 1.0 * np.linalg.norm(action) / self.maxMagnitude
-        reward = reward + cost
+        reward = reward - cost
         return reward

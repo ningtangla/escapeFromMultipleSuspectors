@@ -1,6 +1,6 @@
-import numpy as np 
+import numpy as np
 import pandas as pd
-import math 
+import math
 
 def modifyPrecisionForUntracked(attentionStatus,precisionPerSlot,precisionForUntracked):
     attentionStatus = attentionStatus
@@ -38,24 +38,25 @@ class AttentionSwitch():
     def __call__(self,hypothesisInformation, positionDF):
         newHypothesisInformation=hypothesisInformation.copy()
         hypothesis = hypothesisInformation.index
-        
+
         wolfObjNums = hypothesis.get_level_values('wolfIdentity')
         sheepObjNums = hypothesis.get_level_values('sheepIdentity')
         wolfLoc = positionDF.loc[wolfObjNums]
         sheepLoc = positionDF.loc[sheepObjNums]
-        
+
         distanceBetweenWolfAndSheep = np.sqrt(np.sum(np.power(wolfLoc.values - sheepLoc.values, 2), axis = 1))
-        distancePriorOnHypothesisAttention = self.calDistancePriorOnAttentionSlot(distanceBetweenWolfAndSheep) + 1e-50
+        distancePriorOnHypothesisAttention = self.calDistancePriorOnAttentionSlot(distanceBetweenWolfAndSheep) + 1e-100
         probabilityOnHypothesisAttention = np.exp(hypothesisInformation['logP']) * distancePriorOnHypothesisAttention
         #posteriorOnHypothesisAttention = probabilityOnHypothesisAttention/probabilityOnHypothesisAttention.sum()
         probabilityOnAttentionSlotByGroupbySum = probabilityOnHypothesisAttention.groupby(['wolfIdentity','sheepIdentity']).sum().values
         posteriorOnAttentionSlot = probabilityOnAttentionSlotByGroupbySum/np.sum(probabilityOnAttentionSlotByGroupbySum)
-        #print(posteriorOnAttentionSlot) 
+        #print(posteriorOnAttentionSlot)
         #print('!!!', posteriorOnAttentionSlot, np.sum(posteriorOnAttentionSlot))
         numOtherCondtionBeyondPair = hypothesisInformation.groupby(['wolfIdentity','sheepIdentity']).size().values[0]
         newAttentionStatus=list(np.random.multinomial(self.attentionLimitation, posteriorOnAttentionSlot))*numOtherCondtionBeyondPair
         newHypothesisInformation['attentionStatus']=np.array(newAttentionStatus)
         newHypothesisInformation['logPAttentionPrior'] = hypothesisInformation['logP'] + np.log(distancePriorOnHypothesisAttention)
+        newHypothesisInformation['distanceProb'] = distancePriorOnHypothesisAttention
         return newHypothesisInformation
 
 class AttentionToPrecisionAndDecay():

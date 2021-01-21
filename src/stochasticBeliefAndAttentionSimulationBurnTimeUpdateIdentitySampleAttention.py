@@ -1,4 +1,4 @@
-import pandas as pd 
+import pandas as pd
 import numpy as np
 import AnalyticGeometryFunctions as ag
 import itertools as it
@@ -31,6 +31,7 @@ class ResetBeliefAndAttention():
         p=[np.log(1.0/len(priorIndex))]*len(priorIndex)
         initialHypothesisInformation=pd.DataFrame(p,priorIndex,columns=['logP'])
         initialHypothesisInformation['logPAttentionPrior']=initialHypothesisInformation['logP'].values
+        initialHypothesisInformation['distanceProb']=[1.0] * len(priorIndex)
         allPairs = initialHypothesisInformation.groupby(['wolfIdentity','sheepIdentity']).mean().index
         attentionStatusForPair=np.random.multinomial(self.attentionLimitation,[1/len(allPairs)]*len(allPairs))
         attentionStatusForHypothesis=list(attentionStatusForPair)*numberSubtlety
@@ -41,7 +42,7 @@ class ResetBeliefAndAttention():
         attentionStatusDF = initialHypothesisInformation['attentionStatus']
         [precisionHypothesisDF,decayHypothesisDF]=self.attention(attentionStatusDF)
         initialHypothesisInformation = updateHypothesisInformation(initialHypothesisInformation, precisionHypothesisDF, decayHypothesisDF)
-        
+
         initialAgentStates, initialAgentActions, timeStep, initialWolfIdAndSubtlety = initialPhysicalState
         initialPositionOldTimeDF = self.transferMultiAgentStatesToPositionDF(initialAgentStates)
         initialBeliefAndAttention = [initialHypothesisInformation, initialPositionOldTimeDF]
@@ -114,13 +115,13 @@ class UpdatePhysicalStateImagedByBelief():
         self.lastIdentity = lastIdentity
         self.lastSubtlety = lastSubtlety
     def __call__(self, state):
-        physicalState, beliefAndAttention = state 
+        physicalState, beliefAndAttention = state
         agentStates, agentActions, timeStep, wolfIdAndSubtlety = physicalState
         if (timeStep % self.updateFrequency == 0) or (timeStep <= 1):
 
             hypothesisInformation, positionOldTimeDF = beliefAndAttention
             #attentedHypothesis = hypothesisInformation['attentionStatus']
-            #attentedIdentity = attentedHypothesis.groupby(['wolfIdentity', 'sheepIdentity']).mean() 
+            #attentedIdentity = attentedHypothesis.groupby(['wolfIdentity', 'sheepIdentity']).mean()
             #posteriorOnIdentitySlot = attentedIdentity.values / np.sum(attentedIdentity.values)
             probabilityOnHypothesisIdentity = np.exp(hypothesisInformation['logPAttentionPrior'])
             probabilityOnIdentitySlotByGroupbySum = probabilityOnHypothesisIdentity.groupby(['wolfIdentity','sheepIdentity']).sum()
@@ -136,16 +137,16 @@ class UpdatePhysicalStateImagedByBelief():
             numOtherCondtionBeyondPair = hypothesisInformation.groupby(['wolfIdentity','sheepIdentity']).size().values[0]
             hypothesisInformation['identityProb'] = np.array(list(posteriorOnIdentitySlot) * numOtherCondtionBeyondPair)
             hypothesisInformation['identitySoftenProb'] = np.array(list(softenPosteriorIdentity) * numOtherCondtionBeyondPair)
-            
+
             subtletyInformation = hypothesisInformation[hypothesisInformation.index.get_level_values('wolfIdentity') == beliefWolfId]['logP']
             originSubtletyProbs = np.exp(subtletyInformation.values)
-            posteriorOnSubtlety = originSubtletyProbs / np.sum(originSubtletyProbs) 
+            posteriorOnSubtlety = originSubtletyProbs / np.sum(originSubtletyProbs)
             softenPosteriorSubtletyUnormalized = [np.power(prob, self.softParaForSubtlety) for prob in posteriorOnSubtlety]
             softenPosteriorSubtlety = np.array(softenPosteriorSubtletyUnormalized) / np.sum(softenPosteriorSubtletyUnormalized)
             sampledSubtletyIndex = list(np.random.multinomial(1, softenPosteriorSubtlety)).index(1)
             beliefWolfId, beliefSheepId, beliefWolfSubtlety = subtletyInformation.index[sampledSubtletyIndex]
             #beliefWolfSubtlety = np.random.choice([0.001, 0.31, 0.92, 1.83, 3.3, 11.0, 500.0], p = softenPosteriorSubtlety)
-            
+
             wolfIdAndSubtlety = [int(beliefWolfId), beliefWolfSubtlety]
             updatedPhysicalState = [agentStates, agentActions, timeStep, wolfIdAndSubtlety]
             state = [updatedPhysicalState, beliefAndAttention]
