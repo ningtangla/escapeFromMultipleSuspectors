@@ -23,7 +23,7 @@ import Attention
 import calPosterior as calPosterior
 import stochasticBeliefAndAttentionSimulationBurnTimeUpdateIdentitySamplePosterior as ba
 import env
-import rewardWithActionCostAndDistanceProbability as reward
+import rewardWithActionCost as reward
 import trajectoriesSaveLoad as tsl
 import AnalyticGeometryFunctions as agf
 
@@ -69,7 +69,7 @@ class RunMCTSTrjactory:
                 rootNodes = [self.makeDiffSimulationRoot(action, currState) for treeIndex in range(self.numTree)]
                 actions = mcts(rootNodes)
                 rootNodesOnTruth = [Node(id={action: currState}, numVisited=0, sumValue=0, is_expanded = False) for _ in range(self.numTree)]
-                actionsOnTruth = np.array([[0, 3.4]]) #mcts(rootNodesOnTruth)
+                actionsOnTruth = np.array([[0, 0]]) #mcts(rootNodesOnTruth)
                 #actionSpace = [(np.cos(degreeInPolar), np.sin(degreeInPolar)) for degreeInPolar in np.arange(0, 360, 8)/180 * math.pi]
                 #actions = [actionSpace[np.random.choice(range(len(actionSpace)))]]
             action = actions[int(runningStep/self.actionUpdateFrequecy) % self.planFrequency]
@@ -286,7 +286,7 @@ class RunOneCondition:
                         attentionSwitchFrequencyInSimulation, beliefUpdateFrequencyInSimulation, burnTime)
 
                 attentionSwitchFrequencyInPlay = int(0.6 * numMDPTimeStepPerSecond)
-                beliefUpdateFrequencyInPlay = int(0.6 * numMDPTimeStepPerSecond)
+                beliefUpdateFrequencyInPlay = int(0.2 * numMDPTimeStepPerSecond)
                 updateBeliefAndAttentionInPlay = ba.UpdateBeliefAndAttentionState(attention, computePosterior, attentionSwitch, transferMultiAgentStatesToPositionDF,
                         attentionSwitchFrequencyInPlay, beliefUpdateFrequencyInPlay, burnTime)
 
@@ -322,7 +322,7 @@ class RunOneCondition:
                 getActionPrior = lambda state : {action: 1/len(actionSpace) for action in actionSpace}
 
                 maxRollOutSteps = 5
-                aliveBouns = 1/maxRollOutSteps
+                aliveBouns = 0.2 * 0
                 deathPenalty = -1
                 rewardFunction = reward.RewardFunctionTerminalPenalty(sheepId, aliveBouns, actionCost, deathPenalty, isTerminal, actionSpace)
                 rewardRollout = lambda state, action, nextState: rewardFunction(state, action)
@@ -477,12 +477,12 @@ def main():
     manipulatedVariables['rangeAtt'] = [5.0, 20.0]
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [4]
-    manipulatedVariables['numSim'] = [164]
+    manipulatedVariables['numSim'] = [154]
     manipulatedVariables['actRatio'] = [1.0]
     manipulatedVariables['burnTime'] = [0]
     manipulatedVariables['softId'] = [1.0]
     manipulatedVariables['softSubtlety'] = [1.0]
-    manipulatedVariables['actCost'] = [0.0, 0.1, 0.2, 1.0]
+    manipulatedVariables['actCost'] = [0.05, 0.1, 0.15, 0.2]
     manipulatedVariables['damp'] = [1.0]
 
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])

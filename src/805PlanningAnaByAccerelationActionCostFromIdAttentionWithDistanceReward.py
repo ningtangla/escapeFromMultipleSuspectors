@@ -23,7 +23,7 @@ import Attention
 import calPosterior as calPosterior
 import stochasticBeliefAndAttentionSimulationBurnTimeUpdateIdentitySampleAttention as ba
 import env
-import rewardWithActionCostAndDistanceProbability as reward
+import rewardWithActionCost as reward
 import trajectoriesSaveLoad as tsl
 import AnalyticGeometryFunctions as agf
 
@@ -325,7 +325,7 @@ class RunOneCondition:
                 getActionPrior = lambda state : {action: 1/len(actionSpace) for action in actionSpace}
 
                 maxRollOutSteps = 5
-                aliveBouns = 1/maxRollOutSteps
+                aliveBouns = 0.2 * 0
                 deathPenalty = -1
                 rewardFunction = reward.RewardFunctionTerminalPenalty(sheepId, aliveBouns, actionCost, deathPenalty, isTerminal, actionSpace)
                 rewardRollout = lambda state, action, nextState: rewardFunction(state, action)
@@ -482,12 +482,12 @@ def main():
     manipulatedVariables['rangeAtt'] = [5.0, 20.0]
     manipulatedVariables['cBase'] = [50]
     manipulatedVariables['numTrees'] = [4]
-    manipulatedVariables['numSim'] = [165]
+    manipulatedVariables['numSim'] = [155]
     manipulatedVariables['actRatio'] = [1.0]
     manipulatedVariables['burnTime'] = [0]
     manipulatedVariables['softId'] = [1.0]
     manipulatedVariables['softSubtlety'] = [1.0]
-    manipulatedVariables['actCost'] = [0.0, 0.1, 0.2, 1.0]
+    manipulatedVariables['actCost'] = [0.05, 0.1, 0.15, 0.2]
     manipulatedVariables['damp'] = [1.0]
 
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])

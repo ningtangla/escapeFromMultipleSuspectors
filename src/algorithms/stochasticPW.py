@@ -44,15 +44,15 @@ class ScoreChild:
         stateVisitCount = stateNode.numVisited
         actionPrior = actionNode.actionPrior
         if actionNode.numVisited == 0:
-            qScore = 0 
+            qScore = 0
         else:
             nextStateValues = [nextState.sumValue for nextState in actionNode.children]
             qScore = sum(nextStateValues) / stateActionVisitCount
-        explorationRate = np.log((1 + stateVisitCount + self.cBase) / self.cBase) + self.cInit 
+        explorationRate = np.log((1 + stateVisitCount + self.cBase) / self.cBase) + self.cInit
         uScore = explorationRate * actionPrior * np.sqrt(stateVisitCount) / float(1 + stateActionVisitCount)#selfVisitCount is stateACtionVisitCount
         score = qScore + uScore
         return score
-        
+
 class SelectAction:
     def __init__(self, calculateScore):
         self.calculateScore = calculateScore
@@ -66,7 +66,7 @@ class SelectAction:
 
 class PWidening:
     def __init__(self, alpha, C):
-        self.alpha = alpha 
+        self.alpha = alpha
         self.C = C
 
     def __call__(self, stateNode, actionNode):
@@ -76,15 +76,15 @@ class PWidening:
             return True
         else:
             k = math.ceil(self.C*pow(numActionVisit, self.alpha))
-            return (k> len(actionNode.children)) 
+            return (k> len(actionNode.children))
 
 class ExpandNextState:
     def __init__(self, transitionFunction, pWidening):
         self.transitionFunction = transitionFunction
         self.pWidening = pWidening
-        
+
     def __call__(self, stateNode, actionNode):
-        if self.pWidening(stateNode, actionNode): 
+        if self.pWidening(stateNode, actionNode):
             state = list(stateNode.id.values())[0]
             action = list(actionNode.id.values())[0]
             nextState = self.transitionFunction(state, action)
@@ -97,7 +97,7 @@ class ExpandNextState:
 class SelectNextState:
     def __init__(self, selectAction):
         self.selectAction = selectAction
-        
+
     def __call__(self, stateNode, actionNode):
         nextPossibleState = actionNode.children
         if actionNode.numVisited == 0:
@@ -164,7 +164,7 @@ class OutputAction():
 class PWMultipleTrees:
     def __init__(self, numSimulation, selectAction, selectNextState, expand, expandNewState, estimateValue, backup, outputAction):
         self.numSimulation = numSimulation
-        self.selectAction = selectAction 
+        self.selectAction = selectAction
         self.selectNextState = selectNextState
         self.expand = expand
         self.expandNewState = expandNewState
@@ -189,7 +189,7 @@ class PWMultipleTrees:
                     #print(allNextStateNodes)
                     nextStateNode = self.selectNextState(currentNode, actionNode)
                     #print(nextStateNode)
-                    
+
                     nodePath.append(actionNode)
                     nodePath.append(nextStateNode)
                     currentNode = nextStateNode

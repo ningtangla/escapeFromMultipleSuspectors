@@ -1,4 +1,4 @@
-import numpy as np 
+import numpy as np
 import AnalyticGeometryFunctions as ag
 import math
 
@@ -23,10 +23,10 @@ class IsLegalInitPositions():
         wolfPosition = initPositions[wolfId]
         distractorsPositions = [initPositions[id] for id in distractorsIds]
         sheepWolfDistance = np.linalg.norm((np.array(sheepPosition) - np.array(wolfPosition)), ord=2)
-        sheepDistractorsDistances = [np.linalg.norm((np.array(sheepPosition) - np.array(distractorPosition)), ord=2) 
+        sheepDistractorsDistances = [np.linalg.norm((np.array(sheepPosition) - np.array(distractorPosition)), ord=2)
                 for distractorPosition in distractorsPositions]
         legalSheepWolf = (sheepWolfDistance > self.minSheepWolfDistance)
-        legalSheepDistractors = np.all([(sheepDistractorDistance > self.minSheepDistractorDistance) for sheepDistractorDistance in sheepDistractorsDistances])  
+        legalSheepDistractors = np.all([(sheepDistractorDistance > self.minSheepDistractorDistance) for sheepDistractorDistance in sheepDistractorsDistances])
         legal = legalSheepWolf and legalSheepDistractors
         return legal
 
@@ -44,8 +44,8 @@ class ResetAgentPositions():
         while not self.isLegalInitPositions(initAllAgentsPositions, wolfId, distractorsIds):
             initAllAgentsPositions = [[np.random.uniform(self.xMin, self.xMax),
                           np.random.uniform(self.yMin, self.yMax)]
-                         for _ in range(self.numOfAgnet)] 
-        
+                         for _ in range(self.numOfAgnet)]
+
         initPositions = np.array(initAllAgentsPositions)
         return initPositions
 
@@ -55,10 +55,10 @@ class ResetPhysicalState():
         self.numAgent = numAgent
         self.resetAgentPositions = resetAgentPositions
         self.resetWolfIdAndSubtlety = resetWolfIdAndSubtlety
-    def __call__(self):   
+    def __call__(self):
         startWolfIdAndSubtlety = self.resetWolfIdAndSubtlety()
         wolfId, subtlety = startWolfIdAndSubtlety
-        distractorsIds = [id for id in range(self.numAgent) if id not in [self.sheepId, wolfId]]  
+        distractorsIds = [id for id in range(self.numAgent) if id not in [self.sheepId, wolfId]]
         startAgentPositions = np.array(self.resetAgentPositions(wolfId, distractorsIds))
         #startAgentVelocities = np.array([[0, 0] for agentId in range(self.numAgent)])
         startAgentVelocities = np.array([ag.transitePolarToCartesian(np.random.uniform(-math.pi, math.pi)) for agentId in range(self.numAgent)])
@@ -79,11 +79,11 @@ class SheepPolicy():
         if timeStep % self.updateFrequency == 0:
             warmUpRate = min(1, timeStep/self.warmUpTimeSteps)
             sheepMaxSpeed = self.startMaxSheepSpeed + (self.endMaxSheepSpeed - self.startMaxSheepSpeed) * warmUpRate
-            dampedSheepVel = oldSheepVel * (1.0 - self.damp) 
+            dampedSheepVel = oldSheepVel * (1.0 - self.damp)
             sheepVel = np.array(dampedSheepVel) + np.array(sheepAccer) * int(timeStep > self.burnTime)
             sheepSpeed = np.linalg.norm(sheepVel, ord = 2)
             if sheepSpeed > sheepMaxSpeed:
-                sheepVel = np.array(sheepVel) / sheepSpeed * sheepMaxSpeed 
+                sheepVel = np.array(sheepVel) / sheepSpeed * sheepMaxSpeed
         else:
             sheepVel = np.array(oldSheepVel)
         return sheepVel
@@ -96,12 +96,12 @@ class WolfPolicy():
         self.warmUpTimeSteps = warmUpTimeSteps
     def __call__(self, wolfPos, sheepPos, chasingSubtlety, oldWolfVel, timeStep):
         if timeStep % self.updateFrequency == 0:
-            wolfPosition = np.array(wolfPos)      
+            wolfPosition = np.array(wolfPos)
             sheepPosition = np.array(sheepPos)
             heatSeekingDirectionPolar = ag.transiteCartesianToPolar(sheepPosition - wolfPosition)
-            wolfDirectionPolar = np.random.vonmises(heatSeekingDirectionPolar, chasingSubtlety) 
+            wolfDirectionPolar = np.random.vonmises(heatSeekingDirectionPolar, chasingSubtlety)
             wolfDirection = ag.transitePolarToCartesian(wolfDirectionPolar)
-            
+
             warmUpRate = min(1, timeStep/self.warmUpTimeSteps)
             wolfSpeed = self.minWolfSpeed + (self.maxWolfSpeed - self.minWolfSpeed) * warmUpRate
             wolfVel = wolfSpeed * wolfDirection
@@ -119,13 +119,13 @@ class DistractorPolicy():
         if timeStep % self.updateFrequency == 0:
             distractorPosition = np.array(distractorPos)
             oldDistractorDirectionPolar = ag.transiteCartesianToPolar(oldDistractorVel)
-            distractorDirectionPolar = np.random.uniform(-math.pi*1/3, math.pi*1/3) + oldDistractorDirectionPolar 
+            distractorDirectionPolar = np.random.uniform(-math.pi*1/3, math.pi*1/3) + oldDistractorDirectionPolar
             distractorDirection = ag.transitePolarToCartesian(distractorDirectionPolar)
-            
+
             warmUpRate = min(1, timeStep/self.warmUpTimeSteps)
             distractorSpeed = self.minDistractorSpeed + (self.maxDistractorSpeed - self.minDistractorSpeed) * warmUpRate
             distractorVel = distractorSpeed * distractorDirection
-        else: 
+        else:
             distractorVel = np.array(oldDistractorVel)
         return distractorVel
 
@@ -164,11 +164,11 @@ class UpdatePhysicalState():
         self.sheepId = sheepId
         self.agentIds = list(range(numAgent))
         self.preparePolicy = preparePolicy
-    def __call__(self, oldPhysicalState, action):  
+    def __call__(self, oldPhysicalState, action):
         oldAgentPositions, oldAgentVelocites, timeStep, wolfIdAndSubtlety = oldPhysicalState
         wolfId, wolfSubtlety = wolfIdAndSubtlety
         sheepAction = np.array(action)
-        agentPolicyFunctions = self.preparePolicy(oldAgentPositions, oldAgentVelocites, timeStep, wolfId, wolfSubtlety, sheepAction) 
+        agentPolicyFunctions = self.preparePolicy(oldAgentPositions, oldAgentVelocites, timeStep, wolfId, wolfSubtlety, sheepAction)
         agentActions = [agentPolicyFunctions[agentId](oldAgentPositions[agentId]) for agentId in self.agentIds]
         agentVelocities = agentActions.copy()
         timeStep = timeStep + 1

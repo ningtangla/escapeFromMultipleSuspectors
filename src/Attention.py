@@ -57,6 +57,8 @@ class AttentionSwitch():
         newHypothesisInformation['attentionStatus']=np.array(newAttentionStatus)
         newHypothesisInformation['logPAttentionPrior'] = hypothesisInformation['logP'] + np.log(distancePriorOnHypothesisAttention)
         newHypothesisInformation['distanceProb'] = distancePriorOnHypothesisAttention
+        #print(max(distanceBetweenWolfAndSheep), min(newHypothesisInformation['distanceProb']))
+        #print(newHypothesisInformation[['distanceProb', 'logPAttentionPrior', 'logP']])
         return newHypothesisInformation
 
 class AttentionToPrecisionAndDecay():
