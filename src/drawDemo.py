@@ -126,6 +126,7 @@ class DrawPlanningAna:
         sampledIds = [timeStep[5][i][0] for i in range(len(timeStep[5]))]
         sampledSubtleties = [self.precisionToSubtletyDict[timeStep[5][i][1]] for i in range(len(timeStep[5]))]
 
+        #print(sampledIds)
         action = timeStep[1]
         actionOnTruth = timeStep[4]
 

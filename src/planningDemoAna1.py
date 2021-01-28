@@ -36,9 +36,9 @@ def main():
     CForStateWidening = 2
     cBase = 50
     numTrees = 4
-    numSimulationTimes = 164
+    numSimulationTimes = 154
     damp = 1.0
-    actionCost = 0.1
+    actionCost = 0.05
     trajectoryFixedParameters = {'alpha': alphaForStateWidening, 'C': CForStateWidening, 'damp': damp, 'actCost': actionCost,
             'cBase': cBase, 'numTrees': numTrees, 'numSim': numSimulationTimes}
     trajectoryExtension = '.pickle'
@@ -46,19 +46,19 @@ def main():
 
     # Compute Statistics on the Trajectories
     loadTrajectories = LoadTrajectories(getTrajectorySavePath, loadFromPickle)
-    minAttentionDistance = 40.0
+    minAttentionDistance = 10.0
     rangeAttention = 20.0
     actionRatio = 1.0
     burnTime = 0
-    softId = 0.0
-    softSubtlety = 0.0
+    softId = 1.0
+    softSubtlety = 1.0
     trajectoryParameters = {'minAttDist': minAttentionDistance, 'rangeAtt': rangeAttention, 'actRatio': actionRatio,
             'burnTime': burnTime, 'softId': softId, 'softSubtlety': softSubtlety}
-    chasingSubtlety = 0.01
+    chasingSubtlety = 3.3
     subIndex = 0
-    attentionType = 'idealObserver'
+    #attentionType = 'idealObserver'
     #attentionType = 'preAttention'
-    #attentionType = 'hybrid4'
+    attentionType = 'hybrid4'
     trajectoryParameters.update({'chasingSubtlety': chasingSubtlety, 'subIndex': subIndex, 'attType': attentionType})
 
     trajectories = loadTrajectories(trajectoryParameters)
@@ -120,7 +120,7 @@ def main():
     print(index)
     print([len(trajectory) for trajectory in np.array(trajectories)[index[:]]])
     #print(trajectories[0][1])
-    [chaseTrial(trajectory) for trajectory in np.array(trajectories)[index[0:10]]]
+    [chaseTrial(trajectory) for trajectory in np.array(trajectories)[index[9:10]]]
     #[chaseTrial(trajectory) for trajectory in np.array(trajectories)[index[13:14]]]
 
 if __name__ == '__main__':

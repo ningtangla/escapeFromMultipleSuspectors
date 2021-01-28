@@ -21,8 +21,8 @@ class Readcsv:
 def main():
     manipulatedVariables = OrderedDict()
     manipulatedVariables['alpha'] = [0.25]
-    manipulatedVariables['attType'] = ['idealObserver']#, 'hybrid4']
-    #manipulatedVariables['attType'] = ['hybrid4']#, 'preAttention']
+    #manipulatedVariables['attType'] = ['idealObserver']#, 'hybrid4']
+    manipulatedVariables['attType'] = ['hybrid4']#, 'preAttention']
     #manipulatedVariables['attType'] = ['preAttention']
     #manipulatedVariables['attType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
     #manipulatedVariables['attType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5']
@@ -30,13 +30,13 @@ def main():
     manipulatedVariables['minAttDist'] = [5.0, 10.0, 20.0, 40.0]
     manipulatedVariables['rangeAtt'] = [5.0, 20.0]
     manipulatedVariables['cBase'] = [50]
-    manipulatedVariables['numTrees'] = [2]
-    manipulatedVariables['numSim'] = [164]
+    manipulatedVariables['numTrees'] = [4]
+    manipulatedVariables['numSim'] = [154]
     manipulatedVariables['actRatio'] = [1.0]
     manipulatedVariables['burnTime'] = [0]
     manipulatedVariables['softId'] = [1.0]
     manipulatedVariables['softSubtlety'] = [1.0]
-    manipulatedVariables['actCost'] = [0.0, 0.01, 0.1, 1.0]
+    manipulatedVariables['actCost'] = [0.05, 0.1, 0.15, 0.2]
     manipulatedVariables['damp'] = [1.0]
     manipulatedVariables['measure'] = ['escape']
 
@@ -53,7 +53,7 @@ def main():
     getCSVSavePathByCondition = lambda condition: tsl.GetSavePath(trajectoryDirectory, measurementEscapeExtension, condition)
     #columnNames = [500.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001]
     #columnNames = [500.0, 3.3, 0.92]
-    columnNames = [0.01]
+    columnNames = [3.3, 0.92, 0.01]
     readcsv = Readcsv(getCSVSavePathByCondition, columnNames)
 
     precisionToSubtletyDict={500.0:0, 50.0:5, 11.0:30, 3.3:60, 1.83:90, 0.92:120, 0.31:150, 0.01: 180}
