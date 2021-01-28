@@ -16,7 +16,7 @@ class RewardFunctionTerminalPenalty():
             agentStates, agentActions, timeStep, wolfIdAndSubtlety = physicalState
 
             hypothesisInformation, positionOldTimeDF = beliefAndAttention
-            posteriorOnIdentity = hypothesisInformation['identitySoftenProb'].groupby(['wolfIdentity']).mean().values
+            posteriorOnIdentity = hypothesisInformation['identityProb'].groupby(['wolfIdentity']).mean().values
             wolfProb = posteriorOnIdentity[wolfIdAndSubtlety[0] - 1]
             #print(wolfProb)
             reward = reward + self.deathPenalty * min(1.0, 1.0 * wolfProb)
