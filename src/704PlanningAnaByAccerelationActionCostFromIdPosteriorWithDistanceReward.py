@@ -502,7 +502,7 @@ def main():
     getCSVSavePathByCondition = lambda condition: tsl.GetSavePath(trajectoryDirectory, measurementEscapeExtension, condition)
     runOneCondition = RunOneCondition(getTrajectorySavePathByCondition, getCSVSavePathByCondition)
 
-    runOneCondition(parametersAllCondtion[0])
+    #runOneCondition(parametersAllCondtion[0])
     numCpuCores = os.cpu_count()
     numCpuToUse = int(numCpuCores)
     runPool = mp.Pool(numCpuToUse)
