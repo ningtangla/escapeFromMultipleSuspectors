@@ -137,7 +137,7 @@ class RunOneCondition:
         allActionResults = []
         allVelDiffResults = []
         allResults = []
-        possibleTrialSubtleties = [3.3, 1.83, 0.01]
+        possibleTrialSubtleties = [500.0, 3.3, 1.83, 0.01]
         for subIndex in range(numSub):
             meanIdentiyOnConditions = {}
             meanPerceptionOnConditions = {}
@@ -468,23 +468,23 @@ def drawPerformanceline(dataDf, axForDraw):
 def main():
     manipulatedVariables = OrderedDict()
     manipulatedVariables['alpha'] = [0.25]
-    manipulatedVariables['attType'] = ['idealObserver']
-    #manipulatedVariables['attType'] = ['hybrid4']#, 'preAttention']
+    #manipulatedVariables['attType'] = ['idealObserver']
+    manipulatedVariables['attType'] = ['hybrid4']#, 'preAttention']
     #manipulatedVariables['attType'] = ['preAttention']
     #manipulatedVariables['attType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
     #manipulatedVariables['attType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5']
     manipulatedVariables['C'] = [2]
-    manipulatedVariables['minAttDist'] = [40.0]
-    manipulatedVariables['rangeAtt'] = [20.0]
+    manipulatedVariables['minAttDist'] = [5.0, 10.0, 20.0, 40.0]
+    manipulatedVariables['rangeAtt'] = [5.0, 10.0, 20.0, 40.0]
     manipulatedVariables['cBase'] = [50]
-    manipulatedVariables['numTrees'] = [2, 4]
-    manipulatedVariables['numSim'] = [174]
+    manipulatedVariables['numTrees'] = [4]
+    manipulatedVariables['numSim'] = [184]
     #manipulatedVariables['actRatio'] = [1.0]
     #manipulatedVariables['burnTime'] = [0]
-    manipulatedVariables['softId'] = [0.5, 1.0, 2.0, 4.0]
+    manipulatedVariables['softId'] = [0.1, 1.0, 10.0, 100.0]
     manipulatedVariables['softSubtlety'] = [1.0]
-    manipulatedVariables['actCost'] = [0, 0.05]
-    manipulatedVariables['aliveBouns'] = [0, 0.05, 0.1, 0.2]
+    manipulatedVariables['actCost'] = [0]
+    manipulatedVariables['aliveBouns'] = [0.1]
     manipulatedVariables['damp'] = [1.0]
 
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
