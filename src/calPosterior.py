@@ -10,7 +10,8 @@ def calAngleLikelihoodLogModifiedForPiRange(angle, kappa):
 class CalPosteriorLog():
     def __init__(self, minDistance):
         self.minDistance = minDistance
-    def __call__(self, hypothesesInformation, observedData):    
+    def __call__(self, hypothesesInformation, observedData):
+        hypothesesInformation['distanceBetweenWolfAndSheep'] = observedData['distanceBetweenWolfAndSheep'].values
         hypothesesInformation['chasingLikelihoodLog'] = calAngleLikelihoodLogModifiedForPiRange(observedData['wolfDeviation'], 1/(1/hypothesesInformation.index.get_level_values('chasingPrecision') + 1/hypothesesInformation['perceptionPrecision']))
         hypothesesInformation['escapingLikelihoodLog'] = 0
         hypothesesInformation['beforeLogPAfterDecay'] = hypothesesInformation['memoryDecay'] * hypothesesInformation['logP']
@@ -32,8 +33,8 @@ class CalPosteriorLog():
         #hypothesesInformation['logP'] = logPWithUpLowBound
         #print('***', hypothesesInformation['logP'].values)
         return hypothesesInformation
-    
 
 
 
- 
+
+

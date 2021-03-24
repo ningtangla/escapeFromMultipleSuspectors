@@ -188,8 +188,8 @@ class PWMultipleTrees:
                     allNextStateNodes = self.expandNewState(currentNode, actionNode)
                     #print(allNextStateNodes)
                     nextStateNode = self.selectNextState(currentNode, actionNode)
-                    #print(nextStateNode)
-
+                    #print(list(nextStateNode.id.values())[0][0][3])
+                    #import ipdb; ipdb.set_trace()
                     nodePath.append(actionNode)
                     nodePath.append(nextStateNode)
                     currentNode = nextStateNode

@@ -19,3 +19,4 @@ def computeAngleBetweenVectors(vector1, vector2):
 
 def computeVectorNorm(vector):
     return np.power(np.power(vector, 2).sum(axis = 1), 0.5)
+
