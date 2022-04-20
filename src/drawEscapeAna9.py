@@ -20,21 +20,28 @@ class Readcsv:
 
 def main():
     manipulatedVariables = OrderedDict()
-    manipulatedVariables['alphaForStateWidening'] = [0.75]
-    manipulatedVariables['attentionType'] = ['idealObserver', 'hybrid4']
-    #manipulatedVariables['attentionType'] = ['hybrid4', 'preAttention']
-    #manipulatedVariables['attentionType'] = ['preAttention', 'attention4', 'hybrid4', 'idealObserver']#, 'attention3', 'hybrid3']
-    #manipulatedVariables['attentionType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5', 'preAttention']
+    manipulatedVariables['alpha'] = [0.0, 0.2, 0.4, 0.6]
+    manipulatedVariables['attType'] = ['idealObserver']
+    #manipulatedVariables['attType'] = ['hybrid4']#, 'preAttention']
+    #manipulatedVariables['attType'] = ['preAttention']
+    #manipulatedVariables['attType'] = ['idealObserver', 'preAttention', 'attention4', 'hybrid4']
+    #manipulatedVariables['attType'] = ['preAttentionMem0.65', 'preAttentionMem0.25', 'preAttentionPre0.5', 'preAttentionPre4.5']
+    manipulatedVariables['C'] = [1.0]
+    manipulatedVariables['minAttDist'] = [40.0]#[5.0, 10.0, 20.0, 40.0]
+    manipulatedVariables['rangeAtt'] = [40.0]#[5.0, 10.0, 20.0, 40.0]
+    manipulatedVariables['rangeToCare'] = [20.0]
+    manipulatedVariables['cInit'] = [0.3, 1.0, 3.0, 10.0]
+    manipulatedVariables['cBase'] = [10, 100, 1000, 10000]
+    manipulatedVariables['numTrees'] = [4]
+    manipulatedVariables['numSim'] = [163]
+    #manipulatedVariables['actRatio'] = [1.0]
+    #manipulatedVariables['burnTime'] = [0]
+    manipulatedVariables['softId'] = [1.0]#[0.1, 1.0, 10.0, 100.0]
+    manipulatedVariables['softSubtlety'] = [1.0]
+    #manipulatedVariables['actCost'] = [0]
+    #manipulatedVariables['aliveBouns'] = [0.1]
+    manipulatedVariables['damp'] = [1.0]
     manipulatedVariables['measure'] = ['escape']
-    manipulatedVariables['CForStateWidening'] = [2]
-    #manipulatedVariables['minAttentionDistance'] = [8.5, 12.5]#[18.0, 40.0]
-    manipulatedVariables['minAttentionDistance'] = [20.0, 40.0]
-    manipulatedVariables['rangeAttention'] = [6.2]# 6.2, 6.3]
-    manipulatedVariables['cBase'] = [50]
-    manipulatedVariables['numTrees'] = [2]
-    manipulatedVariables['numSimulationTimes'] = [150, 250]
-    manipulatedVariables['actionRatio'] = [0.2]
-    manipulatedVariables['burnTime'] = [0]
 
     productedValues = it.product(*[[(key, value) for value in values] for key, values in manipulatedVariables.items()])
     parametersAllCondtion = [dict(list(specificValueParameter)) for specificValueParameter in productedValues]
@@ -48,10 +55,12 @@ def main():
     measurementEscapeExtension = '.csv'
     getCSVSavePathByCondition = lambda condition: tsl.GetSavePath(trajectoryDirectory, measurementEscapeExtension, condition)
     #columnNames = [500.0, 11.0, 3.3, 1.83, 0.92, 0.31, 0.001]
-    columnNames = [500.0, 3.3, 0.92]
+    #columnNames = [500.0, 3.3, 0.92, 0.01]
+    columnNames = [500.0, 3.3, 0.92, 0.01]
+    #columnNames = [500.0]
     readcsv = Readcsv(getCSVSavePathByCondition, columnNames)
 
-    precisionToSubtletyDict={500.0:0, 50.0:5, 11.0:30, 3.3:60, 1.83:90, 0.92:120, 0.31:150, 0.001: 180}
+    precisionToSubtletyDict={500.0:0, 50.0:5, 11.0:30, 3.3:60, 1.83:90, 0.92:120, 0.31:150, 0.01: 180}
 
     levelNames = list(manipulatedVariables.keys())
     levelValues = list(manipulatedVariables.values())
@@ -59,18 +68,21 @@ def main():
     toSplitFrame = pd.DataFrame(index = modelIndex)
 
     modelResultDf = toSplitFrame.groupby(levelNames).apply(readcsv)
-    toDropLevels = ['alphaForStateWidening', 'CForStateWidening', 'cBase', 'numTrees', 'rangeAttention', 'actionRatio', 'burnTime', 'measure']
+    toDropLevels = ['minAttDist', 'rangeAtt', 'C', 'numTrees', 'rangeToCare', 'damp', 'softId', 'softSubtlety',
+            'measure', 'attType', 'numSim']
     modelResultDf.index = modelResultDf.index.droplevel(toDropLevels)
     fig = plt.figure()
-    numColumns = len(manipulatedVariables['minAttentionDistance'])
-    numRows = len(manipulatedVariables['numSimulationTimes'])
+    numColumns = len(manipulatedVariables['cInit'])
+    numRows = len(manipulatedVariables['cBase'])
     plotCounter = 1
-    for key, group in modelResultDf.groupby(['numSimulationTimes', 'minAttentionDistance']):
+    for key, group in modelResultDf.groupby(['cBase', 'cInit']):
         columnNamesAsSubtlety = [precisionToSubtletyDict[precision] for precision in group.columns]
         group.columns = columnNamesAsSubtlety
         group = group.stack()
-        group.index.names = ['attentionType', 'minAttentionDistance', 'numSimulationTimes', 'chasingSubtlety']
-        group.index = group.index.droplevel(['minAttentionDistance', 'numSimulationTimes'])
+        #print(group)
+        group.index.names = ['alpha', 'cBase', 'cInit', 'chasingSubtlety']
+        #print(group)
+        group.index = group.index.droplevel(['cInit', 'cBase'])
         group = group.to_frame()
 
         group.columns = ['model']
@@ -80,10 +92,11 @@ def main():
 
         if plotCounter <= numColumns:
             axForDraw.set_title(str(key[1]))
-        for attentionType, grp in group.groupby('attentionType'):
-            grp.index = grp.index.droplevel('attentionType')
-            if str(attentionType) == manipulatedVariables['attentionType'][-1]:
-                grp['human'] = [0.6, 0.37, 0.24]
+        for attentionType, grp in group.groupby('alpha'):
+            print(grp)
+            grp.index = grp.index.droplevel('alpha')
+            #if str(attentionType) == manipulatedVariables['attType'][-1]:
+            #    grp['human'] = [0.24, 0.51]
             #    grp['human'] = [0.6, 0.48, 0.37, 0.25, 0.24, 0.42, 0.51]
             #    grp.plot.line(ax = axForDraw, y = 'human', label = 'human', ylim = (0, 0.7), marker = 'o', rot = 0 )
             grp.plot.line(ax = axForDraw, y = 'model', label = str(attentionType), ylim = (0, 1.1), marker = 'o', rot = 0 )
@@ -93,10 +106,12 @@ def main():
     #plt.suptitle('Measurement = Perception Rate')
     #plt.suptitle('Measurement = Action Deviation')
     #plt.suptitle('Measurement = Velocity Diff')
-    plt.suptitle('Measurement = Escape rate')
-    fig.text(x = 0.5, y = 0.92, s = 'Min Attention Distance', ha = 'center', va = 'center')
+    #plt.suptitle('Measurement = Escape rate')
+    plt.suptitle('ideal Observer')
+    #fig.text(x = 0.5, y = 0.92, s = 'Action Cost', ha = 'center', va = 'center')
+    #fig.text(x = 0.5, y = 0.92, s = 'Min Attention Distance', ha = 'center', va = 'center')
     #fig.text(x = 0.05, y = 0.5, s = 'Attention Range', ha = 'center', va = 'center', rotation=90)
-    fig.text(x = 0.05, y = 0.5, s = 'Number of Simulations', ha = 'center', va = 'center', rotation=90)
+    #fig.text(x = 0.05, y = 0.5, s = 'Action Ratio', ha = 'center', va = 'center', rotation=90)
     plt.show()
 
 if __name__ == "__main__":
